@@ -1,0 +1,60 @@
+@import "variables.module";
+
+.inner-scroll {
+  overflow-y: auto;
+  max-height: 24rem;
+  padding-right: 0.5rem;
+  margin-right: -0.5rem;
+}
+
+.analytics {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  font-family: var(--font-family);
+
+  .controls {
+    width: 300px;
+    height: 100%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .results {
+    width: calc(100% - 300px);
+    height: 100%;
+    padding: 20px;
+
+    .report-header {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+
+      .report-title {
+        flex: 2;
+        color: #666666;
+
+        .report-label {
+          font-size: 42px;
+        }
+
+        .report-description {
+          font-size: 16px;
+          margin-left: 5px;
+        }
+      }
+
+      .control-buttons {
+        justify-self: end;
+        font-size: 1.125rem;
+
+        [class^="Button"] {
+          margin-left: 5px !important;
+        }
+      }
+    }
+  }
+}

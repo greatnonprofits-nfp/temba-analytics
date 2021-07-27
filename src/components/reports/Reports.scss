@@ -1,0 +1,28 @@
+@import "../../variables.module";
+
+.reports-container {
+  .title {
+    text-transform: uppercase;
+    color: #a0a0a0;
+    padding-bottom: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 400;
+  }
+
+  .report-item {
+    display: flex;
+    cursor: pointer;
+    color: inherit;
+    align-items: center;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    border-color: #f7f7f7;
+
+    &:hover {
+      color: var(--primary-rgb);
+      text-decoration: none;
+    }
+  }
+}
