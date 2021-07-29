@@ -11,6 +11,6 @@ export default class Segments extends React.Component<SegmentsProps, SegmentsSta
   }
 
   render() {
-    return <>This is a segments</>;
+    return <></>;
   }
 }

@@ -1,5 +1,5 @@
-.reports-container {
-  margin-bottom: 5px;
+.fields-container {
+  margin-top: 5px;
 
   .title {
     text-transform: uppercase;
@@ -9,7 +9,7 @@
     font-weight: 400;
   }
 
-  .report-item {
+  .field-item {
     display: flex;
     cursor: pointer;
     color: inherit;
@@ -28,5 +28,12 @@
     &.active {
       font-weight: 400;
     }
+  }
+
+  .inner-scroll {
+    overflow-y: auto;
+    max-height: 24rem;
+    padding-right: 0.5rem;
+    margin-right: -0.5rem;
   }
 }

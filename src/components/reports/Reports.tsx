@@ -47,10 +47,8 @@ export default class Reports extends React.Component<ReportsProps, ReportsState>
                   this.setReportActive(report);
                 }}
               >
-                <div className="nav-item">
-                  <div className="name">
-                    {report.text}
-                  </div>
+                <div className="name">
+                  {report.text}
                 </div>
               </div>
             ))}
