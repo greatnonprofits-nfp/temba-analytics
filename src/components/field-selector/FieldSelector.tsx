@@ -1,12 +1,17 @@
 import React from "react";
 import Select from "react-select";
+import {Flow} from "../../utils/types";
 
 
-interface FilterProps {
+interface FieldSelectorProps {
+  flows: Flow[],
+  fields: any[],
+  onFieldsSelected: (fields: any[]) => any;
 }
 
-interface FilterState {
-  filters: any[];
+interface FieldSelectorState {
+  allFields: any[],
+  open: boolean,
 }
 
 const groupStyles = {
@@ -26,36 +31,61 @@ const groupBadgeStyles = {
   padding: '0.16666666666667em 0.5em',
 };
 
-const formatGroupLabel = (data: any) => (
-  <div style={groupStyles}>
-    <span>{data.label}</span>
-    <span style={groupBadgeStyles}>{data.options.length}</span>
-  </div>
-);
+export default class FieldSelector extends React.Component<FieldSelectorProps, FieldSelectorState> {
+  private selectComponent: any;
 
-const testOptions = [
-  {
-    label: "Flow 1", options: [
-      {label: "Result 1", value: "result_1"},
-      {label: "Result 2", value: "result_2"},
-    ]
-  },
-  {
-    label: "Flow 2", options: [
-      {label: "Result 1", value: "result_1"}
-    ]
-  }
-]
-
-
-export default class FieldSelector extends React.Component<FilterProps, FilterState> {
-  constructor(props: FilterProps) {
+  constructor(props: FieldSelectorProps) {
     super(props);
-    this.state = {filters: []};
+    let allFields = this.prepareFields(this.props);
+    this.state = {allFields, open: false};
+  }
+
+  componentWillReceiveProps(nextProps: FieldSelectorProps) {
+    let allFields = this.prepareFields(nextProps);
+    this.setState({allFields, open: false});
+  }
+
+  private prepareFields(props: FieldSelectorProps) {
+    return props.flows.map(flow => {
+      return {
+        label: flow.text,
+        options: flow.rules.filter((rule) => {
+          return !props.fields.find((field: { id: { flow: any, rule: any } }) =>
+            field.id.flow === flow.id && field.id.rule === rule.id
+          )
+        }).map((rule) => {
+          return {label: rule.text, value: {flow: flow.id, rule: rule.id}}
+        })
+      }
+    })
+  }
+
+  private onGroupSelected(options: any) {
+    this.props.onFieldsSelected(options);
+    this.selectComponent.setState({menuIsOpen: false})
+  }
+
+  private onOptionSelected(option: any) {
+    this.props.onFieldsSelected([option])
+    setTimeout(() => this.selectComponent.setState({value: null}), 100)
+  }
+
+  private formatGroupLabel(data: any) {
+    return (
+      <div style={groupStyles} onClick={() => {
+        this.onGroupSelected(data.options)
+      }}>
+        <span>{data.label}</span>
+        <span style={groupBadgeStyles}>{data.options.length}</span>
+      </div>
+    );
   }
 
   render() {
     return <Select
+      ref={(el: any) => {
+        this.selectComponent = el
+      }}
       searchable={true}
       placeholder={"Add a field"}
       styles={{
@@ -77,8 +107,9 @@ export default class FieldSelector extends React.Component<FilterProps, FilterSt
           padding: '2px'
         })
       }}
-      options={testOptions}
-      formatGroupLabel={formatGroupLabel}
+      options={this.state.allFields}
+      formatGroupLabel={this.formatGroupLabel.bind(this)}
+      onChange={this.onOptionSelected.bind(this)}
     />;
   }
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+import Analytics from './App';
 import reportWebVitals from './reportWebVitals';
 
 // bring in our temba-components if they aren't already registered
@@ -12,12 +12,11 @@ if (!componentsExist) {
   });
 }
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+// @ts-ignore
+window.showAnalytics = (ele: HTMLElement, context: any) => {
+  // @ts-ignore
+  ReactDOM.render(<Analytics context={context}/>, ele);
+}
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
