@@ -1,5 +1,3 @@
-@import "../../variables.module";
-
 .reports-container {
   .title {
     text-transform: uppercase;
@@ -21,8 +19,12 @@
     border-color: #f7f7f7;
 
     &:hover {
-      color: var(--primary-rgb);
+      color: RGB(var(--primary-rgb));
       text-decoration: none;
+    }
+
+    &.active {
+      font-weight: 400;
     }
   }
 }
