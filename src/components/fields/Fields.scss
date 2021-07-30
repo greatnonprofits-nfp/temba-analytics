@@ -20,13 +20,13 @@
     padding-bottom: 0.25rem;
     border-color: #f7f7f7;
 
-    &:hover {
-      color: RGB(var(--primary-rgb));
-      text-decoration: none;
+    .controls-container {
+      justify-self: flex-end;
+      margin-left: auto;
     }
 
-    &.active {
-      font-weight: 400;
+    &.inactive {
+      color: #999999;
     }
   }
 
