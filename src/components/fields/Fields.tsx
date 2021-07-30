@@ -32,6 +32,7 @@ export default class Fields extends React.Component<FieldsProps, FieldsState> {
                 key={idx}
                 className={"field-item"}
               >
+                <div className="icon-email-tickets"></div>
                 <div className="name">
                   {field.label}
                 </div>

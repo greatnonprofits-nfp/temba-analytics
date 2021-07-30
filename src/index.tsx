@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import Analytics from './App';
 import reportWebVitals from './reportWebVitals';
+import "./static/temba/style.css";
 
 // bring in our temba-components if they aren't already registered
 var componentsExist = document.body.innerHTML.indexOf('temba-components') > -1;
