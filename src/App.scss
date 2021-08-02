@@ -21,6 +21,24 @@
     padding: 20px;
     display: flex;
     flex-direction: column;
+
+    .contact-groups {
+      display: flex;
+      flex-direction: row;
+      margin-top: 10px;
+
+      .title {
+        text-transform: uppercase;
+        color: #a0a0a0;
+        padding-bottom: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 400;
+      }
+
+      .controls-container {
+        margin-left: auto;
+      }
+    }
   }
 
   .results {

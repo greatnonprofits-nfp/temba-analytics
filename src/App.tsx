@@ -8,6 +8,9 @@ import Filters from "./components/filters/Filters";
 import Segments from "./components/segments/Segments";
 import {ChartType, Field, Flow, Group, Report, ReportFilter, ReportSegment} from "./utils/types"
 import Fields from "./components/fields/Fields";
+import Controls from "./components/controls/Controls";
+import Highcharts from "highcharts";
+import {renderIf} from "./utils";
 
 interface AnalyticsProps {
   context: {
@@ -55,7 +58,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
 
   private handleFieldUpdated(field: Field) {
     let fieldIdx = this.state.fields.findIndex((_field: Field) => _field.id === field.id);
-    let fields: any = mutate(this.state.fields, {[fieldIdx]: { $set: field }});
+    let fields: any = mutate(this.state.fields, {[fieldIdx]: {$set: field}});
     this.setState({fields, dirty: true})
   }
 
@@ -128,6 +131,45 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     return field;
   }
 
+  private handleGroupSegmentCreated() {
+    let colors: any = Highcharts.getOptions().colors;
+    let newSegment: ReportSegment = {
+        label: "Contact Groups",
+        isSegment: true,
+        isGroupSegment: true,
+        categories: this.state.groups.map((group: Group, idx) => {
+          return {
+            id: group.id,
+            label: group.name,
+            count: group.count,
+            isSegment: false,
+            color: colors[idx % colors.length]
+          }
+        })
+    };
+    let segments: any = mutate(this.state.segments, {$push: [newSegment]});
+    this.setState({segments});
+  }
+
+  private handleGroupFilterCreated() {
+    let newFilter: ReportFilter = {
+      label: "Contact Groups",
+      isActive: true,
+      isGroupFilter: true,
+      showAllContacts: true,
+      categories: this.state.groups.map((group: Group) => {
+        return {
+          id: group.id,
+          label: group.name,
+          count: group.count,
+          isFilter: false,
+        }
+      })
+    };
+    let filters: any = mutate(this.state.filters, {$push: [newFilter]});
+    this.setState({filters});
+  }
+
   render() {
     return (
       <div className="analytics">
@@ -148,7 +190,15 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
             onFieldRemoved={this.handleFieldRemoved.bind(this)}
             onFieldUpdated={this.handleFieldUpdated.bind(this)}
           ></Fields>
-          <div></div>
+          {renderIf(this.state.groups.length > 0)(
+            <div className={"contact-groups"}>
+              <div className="title">Contact Groups</div>
+              <Controls
+                onSegmentClicked={this.handleGroupSegmentCreated.bind(this)}
+                onFilterClicked={this.handleGroupFilterCreated.bind(this)}
+              ></Controls>
+            </div>
+          )}
         </div>
         <div className="results">
           <div className="report-header">

@@ -26,7 +26,7 @@ export interface ReportFilter {
   isActive: boolean,
   isGroupFilter: boolean,
   showAllContacts: boolean,
-  fieldId: number,
+  fieldId?: number,
   categories: FilterCategory[]
 }
 
