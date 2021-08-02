@@ -3,11 +3,14 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import Analytics from './App';
 import reportWebVitals from './reportWebVitals';
-import "./static/temba/style.css";
+
+// import icons
+import "@fortawesome/fontawesome-free/css/all.css"
 
 // bring in our temba-components if they aren't already registered
 var componentsExist = document.body.innerHTML.indexOf('temba-components') > -1;
 if (!componentsExist) {
+
   import(('@greatnonprofits-nfp/temba-components')).then(() => {
     console.log('Loading temba components');
   });

@@ -6,7 +6,7 @@ import FieldSelector from "./components/field-selector/FieldSelector";
 import Reports from "./components/reports/Reports";
 import Filters from "./components/filters/Filters";
 import Segments from "./components/segments/Segments";
-import {ChartType, Flow, Group, Report, ReportFilter} from "./utils/types"
+import {ChartType, Field, Flow, Group, Report, ReportFilter, ReportSegment} from "./utils/types"
 import Fields from "./components/fields/Fields";
 
 interface AnalyticsProps {
@@ -21,6 +21,7 @@ interface AnalyticsState {
   groups: Group[],
   reports: Report[],
   filters: ReportFilter[],
+  segments: ReportSegment[],
   fields: any[],
   dirty: boolean,
   currentReport?: Report,
@@ -37,6 +38,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
       reports: this.props.context.reports,
       fields: [],
       filters: [],
+      segments: [],
       dirty: false,
     };
   }
@@ -49,6 +51,18 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
 
   private handleReportSelected(report: Report) {
     this.setState({fields: report.config.fields, currentReport: report});
+  }
+
+  private handleFieldUpdated(field: Field) {
+    let fieldIdx = this.state.fields.findIndex((_field: Field) => _field.id === field.id);
+    let fields: any = mutate(this.state.fields, {[fieldIdx]: { $set: field }});
+    this.setState({fields, dirty: true})
+  }
+
+  private handleFieldRemoved(field: Field) {
+    let fieldIdx = this.state.fields.findIndex((_field: Field) => _field.id === field.id);
+    let fields: any = mutate(this.state.fields, {$splice: [[fieldIdx, 1]]});
+    this.setState({fields, dirty: true})
   }
 
   private handleSelectedFields(fields: { label: string, value: string }[]) {
@@ -88,18 +102,18 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
 
   private createField(id: any, contacts: any, label: string, visible: boolean | null, chartSize = 2, chartType = ChartType.Bar, showDataTable = false, showChoropleth = false, delay = 0) {
     if (this.state.fields.find(field => field.id === id)) return null;
-    let field: any = {
+    let field: Field = {
       id: id,
       label: label,
       isVisible: contacts === 0,
-      isLoaded: false
+      isLoaded: false,
+      chartType: chartType,
+      chartSize: chartSize,
+      showDataTable: showDataTable,
+      showChoropleth: showChoropleth
     }
 
     field.isVisible = visible ? visible : field.isVisible;
-    field.chartType = chartType
-    field.chartSize = chartSize
-    field.showDataTable = showDataTable
-    field.showChoropleth = showChoropleth
     field.table = null
     field.chart = {
       segments: [],
@@ -123,9 +137,18 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
                          fields={this.state.fields}
                          onFieldsSelected={this.handleSelectedFields.bind(this)}
           ></FieldSelector>
-          <Filters filters={this.state.filters}></Filters>
-          <Segments></Segments>
-          <Fields fields={this.state.fields}></Fields>
+          <Filters
+            filters={this.state.filters}
+          ></Filters>
+          <Segments
+            segments={this.state.segments}
+          ></Segments>
+          <Fields
+            fields={this.state.fields}
+            onFieldRemoved={this.handleFieldRemoved.bind(this)}
+            onFieldUpdated={this.handleFieldUpdated.bind(this)}
+          ></Fields>
+          <div></div>
         </div>
         <div className="results">
           <div className="report-header">

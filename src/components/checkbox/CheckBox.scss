@@ -1,0 +1,10 @@
+.checkbox-container {
+  display: flex;
+  gap: 5px;
+
+  .label{
+    &:hover {
+      font-weight: 400;
+    }
+  }
+}

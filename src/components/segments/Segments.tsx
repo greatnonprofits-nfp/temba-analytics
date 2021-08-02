@@ -1,6 +1,9 @@
 import React from "react";
+import {ReportSegment} from "../../utils/types";
 
-interface SegmentsProps {}
+interface SegmentsProps {
+  segments: ReportSegment[],
+}
 interface SegmentsState {}
 
 

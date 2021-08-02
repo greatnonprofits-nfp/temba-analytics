@@ -37,6 +37,7 @@ export interface SegmentCategory {
 }
 
 export interface ReportSegment{
+  fieldId?: any,
   label: string,
   isSegment: boolean,
   isGroupSegment: boolean,
@@ -80,4 +81,21 @@ export interface Group {
   id: number,
   name: string,
   count: number
+}
+
+// Other types
+
+export interface Field {
+  id: any,
+  label: string,
+  chartSize: number,
+  chartType: ChartType,
+  isVisible: boolean,
+  showChoropleth: boolean,
+  showDataTable: boolean,
+
+  categories?: any[],
+  isLoaded?: boolean,
+  table?: any,
+  chart?: any,
 }

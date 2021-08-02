@@ -1,0 +1,13 @@
+.controls-container {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+
+  i {
+    color: #999999;
+
+    &:hover {
+      color: #666666
+    }
+  }
+}

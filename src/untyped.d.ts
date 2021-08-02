@@ -11,5 +11,6 @@ declare namespace JSX {
     'temba-option': any;
     'temba-checkbox': any;
     'temba-charcount': any;
+    'fa-icon': any;
   }
 }
