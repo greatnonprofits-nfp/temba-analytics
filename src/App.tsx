@@ -53,7 +53,12 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
   }
 
   private handleReportSelected(report: Report) {
-    this.setState({fields: report.config.fields, currentReport: report});
+    this.setState({
+      fields: report.config.fields,
+      segments: report.config.segments,
+      filters: report.config.filters,
+      currentReport: report,
+    });
   }
 
   private handleFieldUpdated(field: Field) {
@@ -100,7 +105,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     }
     newFields = newFields.filter(field => !!field);
     let modifiedFields: any = mutate(this.state.fields, {$push: [...newFields]});
-    this.setState({fields: modifiedFields});
+    this.setState({fields: modifiedFields, dirty: true});
   }
 
   private createField(id: any, contacts: any, label: string, visible: boolean | null, chartSize = 2, chartType = ChartType.Bar, showDataTable = false, showChoropleth = false, delay = 0) {
@@ -147,8 +152,10 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
           }
         })
     };
-    let segments: any = mutate(this.state.segments, {$push: [newSegment]});
-    this.setState({segments});
+    let segments: any = this.state.segments;
+    segments.forEach((_segment: ReportSegment) => _segment.isSegment = false);
+    segments = mutate(this.state.segments, {$push: [newSegment]});
+    this.setState({segments, dirty: true});
   }
 
   private handleGroupFilterCreated() {
@@ -167,7 +174,45 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
       })
     };
     let filters: any = mutate(this.state.filters, {$push: [newFilter]});
-    this.setState({filters});
+    this.setState({filters, dirty: true});
+  }
+
+  private handleFilterCreated(filter: ReportFilter) {
+    let filters: any = mutate(this.state.filters, { $push: [filter] });
+    this.setState({filters, dirty: true});
+  }
+
+  private handleFilterUpdated(idx: number, filter: ReportFilter) {
+    let filters: any = mutate(this.state.filters, {[idx]: { $set: filter }});
+    this.setState({filters, dirty: true});
+  }
+
+  private handleFilterDeleted(idx: number) {
+    let filters: any = mutate(this.state.filters, {$splice: [[idx, 1]]});
+    this.setState({filters, dirty: true});
+  }
+
+  private handleSegmentCreated(segment: ReportSegment) {
+    let segments: any = this.state.segments;
+    segments.forEach((_segment: ReportSegment) => _segment.isSegment = false);
+    segments = mutate(segments, { $push: [segment] });
+    this.setState({segments, dirty: true});
+  }
+
+  private handleSegmentUpdated(idx: number, segment: ReportSegment) {
+    let segments: any = this.state.segments;
+    if (segment.isSegment) {
+      segments.forEach((_segment: ReportSegment, segmentIdx: number) => {
+        if (idx !== segmentIdx) _segment.isSegment = false;
+      });
+    }
+    segments = mutate(segments, {[idx]: { $set: segment }});
+    this.setState({segments, dirty: true});
+  }
+
+  private handleSegmentDeleted(idx: number) {
+    let segments: any = mutate(this.state.segments, {$splice: [[idx, 1]]});
+    this.setState({segments, dirty: true});
   }
 
   render() {
@@ -181,14 +226,20 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
           ></FieldSelector>
           <Filters
             filters={this.state.filters}
+            onUpdateFilter={this.handleFilterUpdated.bind(this)}
+            onDeleteFilter={this.handleFilterDeleted.bind(this)}
           ></Filters>
           <Segments
             segments={this.state.segments}
+            onUpdateSegment={this.handleSegmentUpdated.bind(this)}
+            onDeleteSegment={this.handleSegmentDeleted.bind(this)}
           ></Segments>
           <Fields
             fields={this.state.fields}
             onFieldRemoved={this.handleFieldRemoved.bind(this)}
             onFieldUpdated={this.handleFieldUpdated.bind(this)}
+            onFilterCreated={this.handleFilterCreated.bind(this)}
+            onSegmentCreated={this.handleSegmentCreated.bind(this)}
           ></Fields>
           {renderIf(this.state.groups.length > 0)(
             <div className={"contact-groups"}>

@@ -1,6 +1,7 @@
 .checkbox-container {
   display: flex;
   gap: 5px;
+  cursor: pointer;
 
   .label{
     &:hover {

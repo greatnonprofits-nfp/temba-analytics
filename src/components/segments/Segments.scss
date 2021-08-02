@@ -1,4 +1,4 @@
-.filters-container {
+.segments-container {
   margin-top: 10px;
 
   .title {
@@ -9,7 +9,7 @@
     font-weight: 400;
   }
 
-  .filter-item {
+  .segment-item {
     margin-bottom: 2px;
     border: 1px solid #cccccc;
     border-radius: 4px;
@@ -19,7 +19,7 @@
       opacity: 0.5;
     }
 
-    .filter-header {
+    .segment-header {
       margin-top: 3px;
       display: flex;
       flex-direction: row;
@@ -37,7 +37,7 @@
       }
     }
 
-    .filter-categories {
+    .segment-categories {
       list-style: none;
       padding-left: 0;
       margin: 10px 15px;
