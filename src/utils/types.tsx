@@ -96,6 +96,7 @@ export interface Field {
   showDataTable: boolean,
 
   categories?: any[],
+  totalResponses?: number,
   isLoaded?: boolean,
   table?: any,
   chart?: any,

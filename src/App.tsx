@@ -12,6 +12,7 @@ import Controls from "./components/controls/Controls";
 import Highcharts from "highcharts";
 import {renderIf} from "./utils";
 import FlowsPreview from "./components/flows-preview/FlowsPreview";
+import Chart from "./components/chart/Chart";
 
 interface AnalyticsProps {
   context: {
@@ -62,8 +63,8 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     });
   }
 
-  private handleFieldUpdated(field: Field) {
-    let fieldIdx = this.state.fields.findIndex((_field: Field) => _field.id === field.id);
+  private handleFieldUpdated(field: Field, idx?: number) {
+    let fieldIdx = !!idx ? idx : this.state.fields.findIndex((_field: Field) => _field.id === field.id);
     let fields: any = mutate(this.state.fields, {[fieldIdx]: {$set: field}});
     this.setState({fields, dirty: true})
   }
@@ -275,6 +276,9 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
               isVisible={this.state.fields.length === 0}
               onFieldsSelected={this.handleSelectedFields.bind(this)}
             ></FlowsPreview>
+            <div className="charts">
+              {this.state.fields.map((field: Field, idx: number) => (<Chart idx={idx} field={field} onFieldUpdated={this.handleFieldUpdated.bind(this)}></Chart>))}
+            </div>
           </div>
         </div>
       </div>
