@@ -72,7 +72,8 @@ export interface Flow {
   rules: FlowRule[],
   stats: {
     created_on: string,
-    runs: number
+    contacts?: number,
+    runs: number,
   }
 }
 

@@ -11,6 +11,7 @@ import Fields from "./components/fields/Fields";
 import Controls from "./components/controls/Controls";
 import Highcharts from "highcharts";
 import {renderIf} from "./utils";
+import FlowsPreview from "./components/flows-preview/FlowsPreview";
 
 interface AnalyticsProps {
   context: {
@@ -139,18 +140,18 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
   private handleGroupSegmentCreated() {
     let colors: any = Highcharts.getOptions().colors;
     let newSegment: ReportSegment = {
-        label: "Contact Groups",
-        isSegment: true,
-        isGroupSegment: true,
-        categories: this.state.groups.map((group: Group, idx) => {
-          return {
-            id: group.id,
-            label: group.name,
-            count: group.count,
-            isSegment: false,
-            color: colors[idx % colors.length]
-          }
-        })
+      label: "Contact Groups",
+      isSegment: true,
+      isGroupSegment: true,
+      categories: this.state.groups.map((group: Group, idx) => {
+        return {
+          id: group.id,
+          label: group.name,
+          count: group.count,
+          isSegment: false,
+          color: colors[idx % colors.length]
+        }
+      })
     };
     let segments: any = this.state.segments;
     segments.forEach((_segment: ReportSegment) => _segment.isSegment = false);
@@ -178,12 +179,12 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
   }
 
   private handleFilterCreated(filter: ReportFilter) {
-    let filters: any = mutate(this.state.filters, { $push: [filter] });
+    let filters: any = mutate(this.state.filters, {$push: [filter]});
     this.setState({filters, dirty: true});
   }
 
   private handleFilterUpdated(idx: number, filter: ReportFilter) {
-    let filters: any = mutate(this.state.filters, {[idx]: { $set: filter }});
+    let filters: any = mutate(this.state.filters, {[idx]: {$set: filter}});
     this.setState({filters, dirty: true});
   }
 
@@ -195,7 +196,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
   private handleSegmentCreated(segment: ReportSegment) {
     let segments: any = this.state.segments;
     segments.forEach((_segment: ReportSegment) => _segment.isSegment = false);
-    segments = mutate(segments, { $push: [segment] });
+    segments = mutate(segments, {$push: [segment]});
     this.setState({segments, dirty: true});
   }
 
@@ -206,7 +207,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
         if (idx !== segmentIdx) _segment.isSegment = false;
       });
     }
-    segments = mutate(segments, {[idx]: { $set: segment }});
+    segments = mutate(segments, {[idx]: {$set: segment}});
     this.setState({segments, dirty: true});
   }
 
@@ -224,43 +225,56 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
                          fields={this.state.fields}
                          onFieldsSelected={this.handleSelectedFields.bind(this)}
           ></FieldSelector>
-          <Filters
-            filters={this.state.filters}
-            onUpdateFilter={this.handleFilterUpdated.bind(this)}
-            onDeleteFilter={this.handleFilterDeleted.bind(this)}
-          ></Filters>
-          <Segments
-            segments={this.state.segments}
-            onUpdateSegment={this.handleSegmentUpdated.bind(this)}
-            onDeleteSegment={this.handleSegmentDeleted.bind(this)}
-          ></Segments>
-          <Fields
-            fields={this.state.fields}
-            onFieldRemoved={this.handleFieldRemoved.bind(this)}
-            onFieldUpdated={this.handleFieldUpdated.bind(this)}
-            onFilterCreated={this.handleFilterCreated.bind(this)}
-            onSegmentCreated={this.handleSegmentCreated.bind(this)}
-          ></Fields>
-          {renderIf(this.state.groups.length > 0)(
-            <div className={"contact-groups"}>
-              <div className="title">Contact Groups</div>
-              <Controls
-                onSegmentClicked={this.handleGroupSegmentCreated.bind(this)}
-                onFilterClicked={this.handleGroupFilterCreated.bind(this)}
-              ></Controls>
-            </div>
+          {renderIf(this.state.fields.length !== 0)(
+            <>
+              <Filters
+                filters={this.state.filters}
+                onUpdateFilter={this.handleFilterUpdated.bind(this)}
+                onDeleteFilter={this.handleFilterDeleted.bind(this)}
+              ></Filters>
+              <Segments
+                segments={this.state.segments}
+                onUpdateSegment={this.handleSegmentUpdated.bind(this)}
+                onDeleteSegment={this.handleSegmentDeleted.bind(this)}
+              ></Segments>
+              <Fields
+                fields={this.state.fields}
+                onFieldRemoved={this.handleFieldRemoved.bind(this)}
+                onFieldUpdated={this.handleFieldUpdated.bind(this)}
+                onFilterCreated={this.handleFilterCreated.bind(this)}
+                onSegmentCreated={this.handleSegmentCreated.bind(this)}
+              ></Fields>
+              {renderIf(this.state.groups.length > 0)(
+                <div className={"contact-groups"}>
+                  <div className="title">Contact Groups</div>
+                  <Controls
+                    onSegmentClicked={this.handleGroupSegmentCreated.bind(this)}
+                    onFilterClicked={this.handleGroupFilterCreated.bind(this)}
+                  ></Controls>
+                </div>
+              )}
+            </>
           )}
         </div>
         <div className="results">
-          <div className="report-header">
-            <div className="report-title">
-              <div className="report-label">{this.state.currentReport?.text}</div>
-              <div className="report-description">{this.state.currentReport?.description}</div>
+          {renderIf(this.state.fields.length !== 0)(
+            <div className="report-header">
+              <div className="report-title">
+                <div className="report-label">{this.state.currentReport?.text}</div>
+                <div className="report-description">{this.state.currentReport?.description}</div>
+              </div>
+              <div className="control-buttons">
+                {renderIf(!!this.state.currentReport)(<Button name={"Rename"} onClick={this.saveReport}></Button>)}
+                <Button name={"New Report"} onClick={this.saveNewReport}></Button>
+              </div>
             </div>
-            <div className="control-buttons">
-              <Button name={"Rename"} onClick={this.saveReport}></Button>
-              <Button name={"New Report"} onClick={this.saveNewReport}></Button>
-            </div>
+          )}
+          <div className="report-body">
+            <FlowsPreview
+              flows={this.props.context.flows}
+              isVisible={this.state.fields.length === 0}
+              onFieldsSelected={this.handleSelectedFields.bind(this)}
+            ></FlowsPreview>
           </div>
         </div>
       </div>

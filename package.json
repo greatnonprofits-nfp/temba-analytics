@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
-    "@greatnonprofits-nfp/temba-components": "0.8.12"
+    "@greatnonprofits-nfp/temba-components": "0.8.12",
+    "moment": "^2.29.1"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.3",

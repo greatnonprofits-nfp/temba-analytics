@@ -1,0 +1,68 @@
+.flows-preview-container {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  width: 100%;
+
+  .most-active, .most-recent {
+    display: flex;
+    flex-direction: column;
+    width: 49.6%;
+
+    .title {
+      font-size: 30px;
+      font-weight: 100;
+      color: #666666;
+      border-bottom: 1px solid #ecf0f1;
+      padding-bottom: 10px;
+      font-family: 'Helvetica Neue', 'RobotoThin', sans-serif;
+    }
+
+    .flows {
+      display: flex;
+      flex-direction: column;
+
+      .flow-item {
+        display: flex;
+        flex-direction: row;
+        padding: 5px;
+
+        .clickable {
+          cursor: pointer;
+
+          &:hover {
+            color: RGB(var(--primary-rgb)) !important;
+          }
+        }
+
+        .runs-data {
+          color: #bdc3c7;
+          font-size: 11px;
+          font-weight: 200;
+
+          .counter {
+            color: #9ba1a5;
+            font-size: 36px;
+            font-weight: bold;
+          }
+        }
+
+        .main-data {
+          margin-left: 10px;
+          padding-top: 6px;
+          color: #333333;
+
+          .flow-label {
+            line-height: 24px;
+            font-size: 24px;
+            font-weight: 200;
+          }
+
+          .flow-created {
+            color: #9ba1a5;
+          }
+        }
+      }
+    }
+  }
+}

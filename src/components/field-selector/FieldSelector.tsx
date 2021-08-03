@@ -18,6 +18,7 @@ const groupStyles = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
+  cursor: 'pointer',
 };
 
 const groupBadgeStyles = {
@@ -92,7 +93,7 @@ export default class FieldSelector extends React.Component<FieldSelectorProps, F
         option: (provided: any) => ({
           ...provided,
           fontSize: "14px",
-          padding: "5px 10px",
+          padding: "5px 10px 5px 20px",
           borderRadius: "4px",
           margin: "3px",
           cursor: "pointer",
