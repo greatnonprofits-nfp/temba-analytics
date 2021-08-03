@@ -1,5 +1,6 @@
-import React from "react";
+import React, {createRef} from "react";
 import {ChartType, Field} from "../../utils/types";
+import Highcharts from "highcharts";
 import "./Chart.scss"
 
 interface ChartProps {
@@ -13,9 +14,56 @@ interface ChartState {
 
 
 export default class Chart extends React.Component<ChartProps, ChartState> {
+  chartRef: any;
+  containerRef: any;
+  highchartsObject: any;
+  resizeObserver: any;
+
   constructor(props: ChartProps) {
     super(props);
     this.state = {};
+    this.chartRef = createRef();
+    this.containerRef = createRef();
+  }
+
+  componentDidMount() {
+    this.renderChart();
+  }
+
+  componentDidUpdate(prevProps: Readonly<ChartProps>, prevState: Readonly<ChartState>, snapshot?: any) {
+    let field = this.props.field;
+    this.highchartsObject.reflow();
+    if (field.chartType !== ChartType.Donut) {
+      this.highchartsObject.update({
+        chart: {
+          type: field.chartType
+        }
+      })
+    } else {
+      this.highchartsObject.update({
+        chart: {
+          type: 'pie',
+          plotBackgroundColor: null,
+          plotBorderWidth: 0,
+          plotShadow: false
+        },
+        plotOptions: {
+          pie: {
+            dataLabels: {
+              enabled: true,
+              distance: -50,
+              style: {
+                fontWeight: 'bold',
+                color: 'white'
+              }
+            },
+            startAngle: -90,
+            endAngle: 270,
+            size: '100%'
+          }
+        }
+      })
+    }
   }
 
   private renderChartSizeControl(size: number) {
@@ -49,7 +97,31 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
   }
 
   private renderChart() {
-    return <></>;
+    // todo: refactor to use real data
+    let options: any = {
+      chart: {
+        type: 'bar'
+      },
+      title: {
+        text: 'Fruit Consumption'
+      },
+      xAxis: {
+        categories: ['Apples', 'Bananas', 'Oranges']
+      },
+      yAxis: {
+        title: {
+          text: 'Fruit eaten'
+        }
+      },
+      series: [{
+        name: 'Jane',
+        data: [1, 0, 4]
+      }, {
+        name: 'John',
+        data: [5, 7, 3]
+      }]
+    };
+    this.highchartsObject = Highcharts.chart(this.chartRef.current, options);
   }
 
   private renderDataTable() {
@@ -82,7 +154,8 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
               <td>{
                 // @ts-ignore
                 parseInt((category.count / totalCount).toFixed(2) * 100)
-              }%</td>
+              }%
+              </td>
             </tr>
           ))}
         </table>
@@ -94,7 +167,7 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
 
   render() {
     let field: Field = this.props.field;
-    return <div className={"chart-container" + (field.chartSize === 1 ? " small" : "")}>
+    return <div className={"chart-container" + (field.chartSize === 1 ? " small" : "")} ref={this.containerRef}>
       <div className={"chart-title"}>
         {field.label}
         <div className={"responses"}>{field.totalResponses || 0} responses</div>
@@ -120,7 +193,7 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
           </div>
         </div>
       </div>
-      <div className={"chart"}>{this.renderChart()}</div>
+      <div className={"chart"} ref={this.chartRef}/>
       <div className={"datatable"}>{this.renderDataTable()}</div>
     </div>;
   }
