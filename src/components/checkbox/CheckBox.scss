@@ -3,7 +3,10 @@
   gap: 5px;
   cursor: pointer;
 
-  .label{
+  i {
+    padding-top: 3px;
+  }
+  .checkbox-label{
     &:hover {
       font-weight: 400;
     }

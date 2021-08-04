@@ -38,14 +38,14 @@ export default class Segments extends React.Component<SegmentsProps, SegmentsSta
         {this.props.segments.map((segment: ReportSegment, idx) => (
           <div key={idx} className={"segment-item" + (segment.isSegment ? "" : " inactive")}>
             <div className="segment-header">
-              <i className="fab fa-buffer icon" onClick={() => {
+              <i className="fab fa-buffer icon pt-3" onClick={() => {
                 if (!!this.props.onUpdateSegment) {
                   segment.isSegment = !segment.isSegment;
                   this.props.onUpdateSegment(idx, segment);
                 }
               }}></i>
-              <div className="label">{segment.label}</div>
-              <i className="fa fa-trash remove" onClick={() => {
+              <div className="segment-label">{segment.label}</div>
+              <i className="fa fa-trash remove pt-3" onClick={() => {
                 if (!!this.props.onDeleteSegment) this.props.onDeleteSegment(idx)
               }}></i>
             </div>

@@ -20,7 +20,6 @@
     }
 
     .segment-header {
-      margin-top: 3px;
       display: flex;
       flex-direction: row;
       gap: 5px;
@@ -40,7 +39,7 @@
     .segment-categories {
       list-style: none;
       padding-left: 0;
-      margin: 10px 15px;
+      margin: 5px 10px 0 10px;
       li {
         padding: 2px;
       }

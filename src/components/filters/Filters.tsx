@@ -45,14 +45,14 @@ export default class Filters extends React.Component<FiltersProps, FiltersState>
         {this.props.filters.map((filter: ReportFilter, idx) => (
           <div key={idx} className={"filter-item" + (filter.isActive ? "" : " inactive")}>
             <div className="filter-header">
-              <i className="fa fa-filter icon" onClick={() => {
+              <i className="fa fa-filter icon pt-3" onClick={() => {
                 if (!!this.props.onUpdateFilter) {
                   filter.isActive = !filter.isActive;
                   this.props.onUpdateFilter(idx, filter);
                 }
               }}></i>
-              <div className="label">{filter.label}</div>
-              <i className="fa fa-trash remove" onClick={() => {
+              <div className="filter-label">{filter.label}</div>
+              <i className="fa fa-trash remove pt-3" onClick={() => {
                 if (!!this.props.onDeleteFilter) this.props.onDeleteFilter(idx)
               }}></i>
             </div>

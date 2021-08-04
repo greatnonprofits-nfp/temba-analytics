@@ -1,5 +1,9 @@
 @import "variables.module";
 
+.pt-3 {
+  padding-top: 3px;
+}
+
 .inner-scroll {
   overflow-y: auto;
   max-height: 24rem;

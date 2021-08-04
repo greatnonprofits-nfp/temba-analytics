@@ -31,7 +31,7 @@ export default class CheckBox extends React.Component<CheckBoxProps, CheckBoxSta
   render() {
     return <div className={"checkbox-container"} onClick={this.handleOnChecked.bind(this)}>
       <i className={"far" + (this.state.checked ? " fa-check-square" : " fa-square")}/>
-      <div className="label">{this.state.label}</div>
+      <div className="checkbox-label">{this.state.label}</div>
     </div>;
   }
 }

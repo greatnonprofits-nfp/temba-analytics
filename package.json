@@ -28,7 +28,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts ../rapidpro/node_modules/@greatnonprofits-nfp/temba-analytics/build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

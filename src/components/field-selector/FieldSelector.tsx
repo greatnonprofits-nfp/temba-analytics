@@ -95,7 +95,7 @@ export default class FieldSelector extends React.Component<FieldSelectorProps, F
           fontSize: "14px",
           padding: "5px 10px 5px 20px",
           borderRadius: "4px",
-          margin: "3px",
+          margin: "3px 5px 0 0",
           cursor: "pointer",
           color: "var(--color-text-dark)",
           backgroundColor: "white",
@@ -105,7 +105,7 @@ export default class FieldSelector extends React.Component<FieldSelectorProps, F
         }),
         menuList: (provided: any) => ({
           ...provided,
-          padding: '2px'
+          padding: '4px'
         })
       }}
       options={this.state.allFields}
