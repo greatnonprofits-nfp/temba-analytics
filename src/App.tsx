@@ -6,7 +6,7 @@ import FieldSelector from "./components/field-selector/FieldSelector";
 import Reports from "./components/reports/Reports";
 import Filters from "./components/filters/Filters";
 import Segments from "./components/segments/Segments";
-import {ChartType, Field, Flow, Group, Report, ReportFilter, ReportSegment} from "./utils/types"
+import {ChartType, Field, Flow, FlowRuleCategory, Group, Report, ReportFilter, ReportSegment} from "./utils/types"
 import Fields from "./components/fields/Fields";
 import Controls from "./components/controls/Controls";
 import Highcharts from "highcharts";
@@ -75,7 +75,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     this.setState({fields, dirty: true})
   }
 
-  private handleSelectedFields(fields: { label: string, value: string }[]) {
+  private handleSelectedFields(fields: { label: string, value: string, categories?: FlowRuleCategory[]}[]) {
     let idx = 0;
     let types = ['bar', 'donut', 'column'];
     let smallCharts = 0;
@@ -102,7 +102,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
           showDataTable = true;
         }
       }
-      newFields.push(this.createField(field.value, 0, field.label, null, chartSize, chartType, showDataTable, showChoropleth));
+      newFields.push(this.createField(field.value, 0, field.label, null, chartSize, chartType, showDataTable, showChoropleth, field.categories));
       idx++;
     }
     newFields = newFields.filter(field => !!field);
@@ -110,7 +110,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     this.setState({fields: modifiedFields, dirty: true});
   }
 
-  private createField(id: any, contacts: any, label: string, visible: boolean | null, chartSize = 2, chartType = ChartType.Bar, showDataTable = false, showChoropleth = false, delay = 0) {
+  private createField(id: any, contacts: any, label: string, visible: boolean | null, chartSize = 2, chartType = ChartType.Bar, showDataTable = false, showChoropleth = false, categories?: FlowRuleCategory[]) {
     if (this.state.fields.find(field => field.id === id)) return null;
     let field: Field = {
       id: id,
@@ -120,7 +120,8 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
       chartType: chartType,
       chartSize: chartSize,
       showDataTable: showDataTable,
-      showChoropleth: showChoropleth
+      showChoropleth: showChoropleth,
+      categories: categories,
     }
 
     field.isVisible = visible ? visible : field.isVisible;
@@ -277,7 +278,8 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
               onFieldsSelected={this.handleSelectedFields.bind(this)}
             ></FlowsPreview>
             <div className="charts">
-              {this.state.fields.map((field: Field, idx: number) => (<Chart idx={idx} field={field} onFieldUpdated={this.handleFieldUpdated.bind(this)}></Chart>))}
+              {this.state.fields.map((field: Field, idx: number) => (
+                <Chart key={idx} idx={idx} field={field} onFieldUpdated={this.handleFieldUpdated.bind(this)}></Chart>))}
             </div>
           </div>
         </div>

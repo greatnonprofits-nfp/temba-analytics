@@ -59,11 +59,19 @@ export interface Report {
 }
 
 // Flow related data types
+export interface FlowRuleCategory{
+  label: string,
+  contact: number
+}
+
 export interface FlowRule {
   id: number,
   flow: number,
   text: string,
-  stats: {created_on: string},
+  stats: {
+    created_on: string,
+    categories?: FlowRuleCategory[],
+  },
 }
 
 export interface Flow {

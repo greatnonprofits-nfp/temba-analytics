@@ -33,7 +33,7 @@ export default class FlowsPreview extends React.Component<FlowsPreviewProps, Flo
   private handleFlowClicked(flow: Flow) {
     if (!!this.props.onFieldsSelected) {
       let fields = flow.rules.map((rule) => {
-        return {label: rule.text, value: {flow: flow.id, rule: rule.id}}
+        return {label: rule.text, value: {flow: flow.id, rule: rule.id}, categories: rule.stats.categories}
       });
       this.props.onFieldsSelected(fields);
     }
