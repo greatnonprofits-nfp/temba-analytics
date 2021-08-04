@@ -1,0 +1,36 @@
+.body {
+  --textarea-height: 150px;
+
+  &.p-6 {
+    padding: 1.6rem;
+  }
+
+  label {
+    margin-bottom: 5px;
+    margin-left: 4px;
+    display: block;
+    font-weight: 400;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    line-height: normal;
+    color: rgb(119, 119, 119);
+  }
+
+  .report-description {
+    margin-top: 10px;
+  }
+
+  .alert-error {
+    background: rgba(255, 181, 181, 0.17);
+    border-top: none;
+    border-right: none;
+    border-bottom: none;
+    border-image: initial;
+    border-left: 0px solid var(--color-error);
+    color: var(--color-error);
+    padding: 10px;
+    margin: 0 0 15px 0;
+    border-radius: var(--curvature);
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
+  }
+}

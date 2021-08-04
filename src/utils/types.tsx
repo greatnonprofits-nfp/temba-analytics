@@ -51,7 +51,7 @@ export interface ReportConfig {
 }
 
 export interface Report {
-  id: number,
+  id?: number,
   text: string,
   description: string,
   public: boolean,
