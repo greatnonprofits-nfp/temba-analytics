@@ -40,6 +40,7 @@ export default class Fields extends React.Component<FieldsProps, FieldsState> {
     field.isVisible = checked;
     let fields: any = mutate(this.state.fields, {[idx]: {$set: field}});
     this.setState({fields});
+    if (!!this.props.onFieldUpdated) this.props.onFieldUpdated(field);
   }
 
   private handleOnSegmentClicked(field: Field) {

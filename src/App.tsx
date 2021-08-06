@@ -380,7 +380,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
               onFieldsSelected={this.handleSelectedFields.bind(this)}
             />
             <div className="charts">
-              {this.state.fields.map((field: Field, idx: number) => (
+              {this.state.fields.filter((field: Field) => !!field.isVisible).map((field: Field, idx: number) => (
                 <Chart key={idx} idx={idx} field={field} onFieldUpdated={this.handleFieldUpdated.bind(this)}/>))}
             </div>
           </div>
