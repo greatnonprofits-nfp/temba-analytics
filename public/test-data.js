@@ -440,5 +440,9 @@ var test_data = {
       "id": 4,
       "name": "Survey Audience"
     }
-  ]
-}
+  ],
+  "endpoints": {
+      "createUpdateReport": "",
+      "loadChartsData": "",
+  }
+};

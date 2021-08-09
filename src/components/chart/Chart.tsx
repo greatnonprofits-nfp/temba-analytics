@@ -3,6 +3,12 @@ import {ChartType, Field} from "../../utils/types";
 import Highcharts from "highcharts";
 import "./Chart.scss"
 
+interface SeriesData {
+  name: string,
+  color: string,
+  y: any,
+}
+
 interface ChartProps {
   idx: number,
   field: Field,
@@ -37,33 +43,54 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
       this.highchartsObject.update({
         chart: {
           type: field.chartType
+        },
+        plotOptions: {
+          pie: {
+            size: '100%',
+            innerSize: '0%'
+          }
         }
       })
     } else {
       this.highchartsObject.update({
         chart: {
           type: 'pie',
-          plotBackgroundColor: null,
-          plotBorderWidth: 0,
-          plotShadow: false
         },
         plotOptions: {
           pie: {
-            dataLabels: {
-              enabled: true,
-              distance: -50,
-              style: {
-                fontWeight: 'bold',
-                color: 'white'
-              }
-            },
-            startAngle: -90,
-            endAngle: 270,
-            size: '100%'
+            size: '100%',
+            innerSize: '50%'
           }
         }
       })
     }
+    // update charts data
+    let chartsData = this.prepareChartsData();
+    this.highchartsObject.update({
+      xAxis: {
+        categories: chartsData.categories,
+      },
+      series: [{
+        name: 'Contacts',
+        data: chartsData.series,
+      }]
+    });
+  }
+
+  private prepareChartsData() {
+    let colors: any = Highcharts.getOptions().colors;
+    let field = this.props.field;
+    let categories: string[] = [];
+    let series: SeriesData[] = [];
+    field.categories?.forEach((fieldCategory, idx) => {
+      categories.push(fieldCategory.label);
+      series.push({
+        name: fieldCategory.label,
+        color: colors[idx % colors.length],
+        y: fieldCategory.count
+      })
+    });
+    return {categories, series};
   }
 
   private renderChartSizeControl(size: number) {
@@ -97,28 +124,32 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
   }
 
   private renderChart() {
-    // todo: refactor to use real data
+    let field = this.props.field;
+    let chartsData = this.prepareChartsData();
     let options: any = {
       chart: {
-        type: 'bar'
+        type: field.chartType === ChartType.Donut ? 'pie' : field.chartType,
+      },
+      plotOptions: {
+        pie: {
+          size: '100%',
+          innerSize: field.chartType === ChartType.Donut ? '50%' : '0%',
+        }
       },
       title: {
-        text: 'Fruit Consumption'
+        text: ''
       },
       xAxis: {
-        categories: ['Apples', 'Bananas', 'Oranges']
+        categories: chartsData.categories,
       },
       yAxis: {
         title: {
-          text: 'Fruit eaten'
+          text: 'Contacts'
         }
       },
       series: [{
-        name: 'Jane',
-        data: [1, 0, 4]
-      }, {
-        name: 'John',
-        data: [5, 7, 3]
+        name: 'Contacts',
+        data: chartsData.series,
       }]
     };
     this.highchartsObject = Highcharts.chart(this.chartRef.current, options);
@@ -126,38 +157,22 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
 
   private renderDataTable() {
     let field = this.props.field;
-    if (field.showDataTable) {
-      // todo: refactor to use real data
-      let categories = [
-        {
-          label: "1",
-          count: 13
-        },
-        {
-          label: "2",
-          count: 31
-        },
-        {
-          label: "3",
-          count: 2
-        },
-      ];
-      let totalCount = categories.reduce((val, item) => val + item.count, 0);
-
+    if (field.showDataTable && field.categories && field.totalResponses) {
       return (
         <table>
-          {categories.map((category) => (
-            <tr>
+          <tbody>
+          {field.categories.map((category, idx) => (
+            <tr key={idx}>
               <th>{category.label}</th>
               <td>{category.count}</td>
-
               <td>{
                 // @ts-ignore
-                parseInt((category.count / totalCount).toFixed(2) * 100)
+                parseInt((category.count / field.totalResponses).toFixed(2) * 100)
               }%
               </td>
             </tr>
           ))}
+          </tbody>
         </table>
       )
     } else {

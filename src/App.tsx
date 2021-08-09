@@ -23,6 +23,7 @@ interface AnalyticsProps {
     reports: Report[],
     endpoints: {
       createUpdateReport: string,
+      loadChartsData: string,
     }
   }
 }
@@ -94,6 +95,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
                 segments: response.data.report.segments,
                 filters: response.data.report.filters,
                 fields: response.data.report.fields,
+                dirty: false,
               });
             }
           }).catch((error) => {
@@ -133,6 +135,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
                 this.setState({
                   reports,
                   currentReport: report,
+                  dirty: false,
                 });
               }
             }).catch((error) => {
@@ -152,6 +155,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
       currentReport: report,
       dirty: false,
     });
+    this.loadChartDataForFields(report.config.fields);
   }
 
   private handleFieldUpdated(field: Field, idx?: number) {
@@ -166,21 +170,19 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     this.setState({fields, dirty: true})
   }
 
-  private handleSelectedFields(fields: { label: string, value: string, categories?: FlowRuleCategory[] }[]) {
+  private handleSelectedFields(fields: { label: string, value: string }[]) {
     let idx = 0;
     let types = ['bar', 'donut', 'column'];
     let smallCharts = 0;
     let chartType: any = null;
     let chartSize = 1;
     let showDataTable = false;
-    let showChoropleth = false;
     let newFields = [];
 
     for (const field of fields) {
       chartType = types[idx % types.length];
       chartSize = 1;
       showDataTable = false;
-      showChoropleth = false;
 
       if (smallCharts > 0) {
         smallCharts--;
@@ -193,15 +195,16 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
           showDataTable = true;
         }
       }
-      newFields.push(this.createField(field.value, 0, field.label, null, chartSize, chartType, showDataTable, showChoropleth, field.categories));
+      newFields.push(this.createField(field.value, 0, field.label, null, chartSize, chartType, showDataTable));
       idx++;
     }
     newFields = newFields.filter(field => !!field);
     let modifiedFields: any = mutate(this.state.fields, {$push: [...newFields]});
     this.setState({fields: modifiedFields, dirty: true});
+    this.loadChartDataForFields(modifiedFields);
   }
 
-  private createField(id: any, contacts: any, label: string, visible: boolean | null, chartSize = 2, chartType = ChartType.Bar, showDataTable = false, showChoropleth = false, categories?: FlowRuleCategory[]) {
+  private createField(id: any, contacts: any, label: string, visible: boolean | null, chartSize = 2, chartType = ChartType.Bar, showDataTable = false) {
     if (this.state.fields.find(field => field.id === id)) return null;
     let field: Field = {
       id: id,
@@ -211,8 +214,6 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
       chartType: chartType,
       chartSize: chartSize,
       showDataTable: showDataTable,
-      showChoropleth: showChoropleth,
-      categories: categories,
     }
 
     field.isVisible = visible ? visible : field.isVisible;
@@ -223,11 +224,29 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
       chartType: chartType,
       total: 0
     }
-
-    // todo: add code to load field data.
-    // todo: add code to update chart.
-
     return field;
+  }
+
+  private loadChartDataForFields(fields: Field[]) {
+    let fieldsToLoad = fields.filter((field: Field) => field.isVisible).map((field: Field) => {
+      return {id: field.id}
+    });
+    if (!this.props.context.endpoints.loadChartsData) return;
+    axios.post(this.props.context.endpoints.loadChartsData, {fields: fieldsToLoad}, {
+      headers: this.getRequestHeaders()
+    }).then((response) => {
+      let fields_categories: { id: { flow: number, rule: string }, categories: FlowRuleCategory[] }[] = response.data;
+      fields.forEach((field: Field) => {
+        let field_categories = fields_categories
+          .find(item => item.id.flow === field.id.flow && item.id.rule === field.id.rule);
+        if (field_categories) {
+          field.categories = field_categories.categories;
+          field.totalResponses = field.categories.reduce((val, item) => val + item.count, 0);
+          field.isLoaded = true;
+        }
+      });
+      this.setState({fields});
+    }).catch(reason => console.error(reason));
   }
 
   private handleGroupSegmentCreated() {
@@ -241,7 +260,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
           id: group.id,
           label: group.name,
           count: group.count,
-          isSegment: false,
+          isSegment: true,
           color: colors[idx % colors.length]
         }
       })
@@ -380,7 +399,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
               onFieldsSelected={this.handleSelectedFields.bind(this)}
             />
             <div className="charts">
-              {this.state.fields.filter((field: Field) => !!field.isVisible).map((field: Field, idx: number) => (
+              {this.state.fields.filter((field: Field) => field.isVisible && !!field.isLoaded).map((field: Field, idx: number) => (
                 <Chart key={idx} idx={idx} field={field} onFieldUpdated={this.handleFieldUpdated.bind(this)}/>))}
             </div>
           </div>

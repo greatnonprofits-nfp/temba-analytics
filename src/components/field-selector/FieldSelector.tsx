@@ -55,7 +55,7 @@ export default class FieldSelector extends React.Component<FieldSelectorProps, F
             field.id.flow === flow.id && field.id.rule === rule.id
           )
         }).map((rule) => {
-          return {label: rule.text, value: {flow: flow.id, rule: rule.id}, categories: rule.stats.categories}
+          return {label: rule.text, value: {flow: flow.id, rule: rule.id}}
         })
       }
     })

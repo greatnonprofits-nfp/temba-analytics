@@ -97,7 +97,7 @@ export default class Fields extends React.Component<FieldsProps, FieldsState> {
                   checked={field.isVisible}
                   onChecked={(checked) => {
                     this.handleFieldUpdated(idx, field, checked)
-                  }}></CheckBox>
+                  }}/>
                 <Controls
                   onSegmentClicked={() => {
                     this.handleOnSegmentClicked(field)
@@ -108,7 +108,7 @@ export default class Fields extends React.Component<FieldsProps, FieldsState> {
                   onRemoveClicked={() => {
                     this.handleFieldRemoved(idx, field)
                   }}
-                ></Controls>
+                />
               </div>
             ))}
           </div>
