@@ -17,6 +17,7 @@ export interface ReportField {
 }
 
 export interface FilterCategory {
+  id?: number,
   label: string,
   isFilter: boolean
 }
@@ -31,6 +32,7 @@ export interface ReportFilter {
 }
 
 export interface SegmentCategory {
+  id?: number,
   label: string,
   color: string,
   isSegment: boolean

@@ -6,7 +6,16 @@ import FieldSelector from "./components/field-selector/FieldSelector";
 import Reports from "./components/reports/Reports";
 import Filters from "./components/filters/Filters";
 import Segments from "./components/segments/Segments";
-import {ChartType, Field, Flow, FlowRuleCategory, Group, Report, ReportFilter, ReportSegment} from "./utils/types"
+import {
+  ChartType,
+  Field,
+  Flow,
+  FlowRuleCategory,
+  Group,
+  Report,
+  ReportFilter,
+  ReportSegment
+} from "./utils/types"
 import Fields from "./components/fields/Fields";
 import Controls from "./components/controls/Controls";
 import Highcharts from "highcharts";
@@ -155,7 +164,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
       currentReport: report,
       dirty: false,
     });
-    this.loadChartDataForFields(report.config.fields);
+    this.loadChartDataForFields(report.config.fields, report.config.filters, report.config.segments);
   }
 
   private handleFieldUpdated(field: Field, idx?: number) {
@@ -168,6 +177,76 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     let fieldIdx = this.state.fields.findIndex((_field: Field) => _field.id === field.id);
     let fields: any = mutate(this.state.fields, {$splice: [[fieldIdx, 1]]});
     this.setState({fields, dirty: true})
+  }
+
+  private createField(id: any, contacts: any, label: string, visible: boolean | null, chartSize = 2, chartType = ChartType.Bar, showDataTable = false) {
+    if (this.state.fields.find(field => field.id === id)) return null;
+    let field: Field = {
+      id: id,
+      label: label,
+      isVisible: contacts === 0,
+      isLoaded: false,
+      chartType: chartType,
+      chartSize: chartSize,
+      showDataTable: showDataTable,
+    }
+
+    field.isVisible = visible ? visible : field.isVisible;
+    field.table = null
+    field.chart = {
+      segments: [],
+      categories: [],
+      chartType: chartType,
+      total: 0
+    }
+    return field;
+  }
+
+  private loadChartDataForFields(_fields: Field[], _filters: ReportFilter[], _segments: ReportSegment[]) {
+    // prepare request data
+    let filters = {
+      values: _filters.filter(filter => filter.isActive && !filter.isGroupFilter).map(filter => {
+        return {
+          field: filter.fieldId,
+          categories: filter.categories.filter(category => category.isFilter).map(category => category.label),
+        }
+      }),
+      groups: _filters.filter(filter => filter.isActive && filter.isGroupFilter && !filter.showAllContacts).map(filter => {
+        return filter.categories.filter(category => category.isFilter).map(category => category.id);
+      })
+    };
+    let segments = {
+      values: _segments.filter(segment => segment.isSegment && !segment.isGroupSegment).map(segment => {
+        return {
+          field: segment.fieldId,
+          categories: segment.categories.filter(segment => segment.isSegment).map(category => category.label),
+        }
+      }),
+      groups: _segments.filter(segment => segment.isSegment && segment.isGroupSegment).map(segment => {
+        return segment.categories.filter(category => category.isSegment).map(category => category.id);
+      })
+    }
+    let fields = _fields.filter((field: Field) => field.isVisible).map((field: Field) => {
+      return {id: field.id}
+    });
+
+    // request necessary data
+    if (!this.props.context.endpoints.loadChartsData) return;
+    axios.post(this.props.context.endpoints.loadChartsData, {fields, filters, segments}, {
+      headers: this.getRequestHeaders()
+    }).then((response) => {
+      let fields_categories: { id: { flow: number, rule: string }, categories: FlowRuleCategory[] }[] = response.data;
+      _fields.forEach((field: Field) => {
+        let field_categories = fields_categories
+          .find(item => item.id.flow === field.id.flow && item.id.rule === field.id.rule);
+        if (field_categories) {
+          field.categories = field_categories.categories;
+          field.totalResponses = field.categories.reduce((val, item) => val + item.count, 0);
+          field.isLoaded = true;
+        }
+      });
+      this.setState({fields: _fields});
+    }).catch(reason => console.error(reason));
   }
 
   private handleSelectedFields(fields: { label: string, value: string }[]) {
@@ -201,52 +280,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     newFields = newFields.filter(field => !!field);
     let modifiedFields: any = mutate(this.state.fields, {$push: [...newFields]});
     this.setState({fields: modifiedFields, dirty: true});
-    this.loadChartDataForFields(modifiedFields);
-  }
-
-  private createField(id: any, contacts: any, label: string, visible: boolean | null, chartSize = 2, chartType = ChartType.Bar, showDataTable = false) {
-    if (this.state.fields.find(field => field.id === id)) return null;
-    let field: Field = {
-      id: id,
-      label: label,
-      isVisible: contacts === 0,
-      isLoaded: false,
-      chartType: chartType,
-      chartSize: chartSize,
-      showDataTable: showDataTable,
-    }
-
-    field.isVisible = visible ? visible : field.isVisible;
-    field.table = null
-    field.chart = {
-      segments: [],
-      categories: [],
-      chartType: chartType,
-      total: 0
-    }
-    return field;
-  }
-
-  private loadChartDataForFields(fields: Field[]) {
-    let fieldsToLoad = fields.filter((field: Field) => field.isVisible).map((field: Field) => {
-      return {id: field.id}
-    });
-    if (!this.props.context.endpoints.loadChartsData) return;
-    axios.post(this.props.context.endpoints.loadChartsData, {fields: fieldsToLoad}, {
-      headers: this.getRequestHeaders()
-    }).then((response) => {
-      let fields_categories: { id: { flow: number, rule: string }, categories: FlowRuleCategory[] }[] = response.data;
-      fields.forEach((field: Field) => {
-        let field_categories = fields_categories
-          .find(item => item.id.flow === field.id.flow && item.id.rule === field.id.rule);
-        if (field_categories) {
-          field.categories = field_categories.categories;
-          field.totalResponses = field.categories.reduce((val, item) => val + item.count, 0);
-          field.isLoaded = true;
-        }
-      });
-      this.setState({fields});
-    }).catch(reason => console.error(reason));
+    this.loadChartDataForFields(modifiedFields, this.state.filters, this.state.segments);
   }
 
   private handleGroupSegmentCreated() {
@@ -269,6 +303,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     segments.forEach((_segment: ReportSegment) => _segment.isSegment = false);
     segments = mutate(this.state.segments, {$push: [newSegment]});
     this.setState({segments, dirty: true});
+    this.loadChartDataForFields(this.state.fields, this.state.filters, segments);
   }
 
   private handleGroupFilterCreated() {
@@ -288,21 +323,25 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     };
     let filters: any = mutate(this.state.filters, {$push: [newFilter]});
     this.setState({filters, dirty: true});
+    this.loadChartDataForFields(this.state.fields, filters, this.state.segments);
   }
 
   private handleFilterCreated(filter: ReportFilter) {
     let filters: any = mutate(this.state.filters, {$push: [filter]});
     this.setState({filters, dirty: true});
+    this.loadChartDataForFields(this.state.fields, filters, this.state.segments);
   }
 
   private handleFilterUpdated(idx: number, filter: ReportFilter) {
     let filters: any = mutate(this.state.filters, {[idx]: {$set: filter}});
     this.setState({filters, dirty: true});
+    this.loadChartDataForFields(this.state.fields, filters, this.state.segments);
   }
 
   private handleFilterDeleted(idx: number) {
     let filters: any = mutate(this.state.filters, {$splice: [[idx, 1]]});
     this.setState({filters, dirty: true});
+    this.loadChartDataForFields(this.state.fields, filters, this.state.segments);
   }
 
   private handleSegmentCreated(segment: ReportSegment) {
@@ -310,6 +349,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     segments.forEach((_segment: ReportSegment) => _segment.isSegment = false);
     segments = mutate(segments, {$push: [segment]});
     this.setState({segments, dirty: true});
+    this.loadChartDataForFields(this.state.fields, this.state.filters, segments);
   }
 
   private handleSegmentUpdated(idx: number, segment: ReportSegment) {
@@ -321,11 +361,13 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     }
     segments = mutate(segments, {[idx]: {$set: segment}});
     this.setState({segments, dirty: true});
+    this.loadChartDataForFields(this.state.fields, this.state.filters, segments);
   }
 
   private handleSegmentDeleted(idx: number) {
     let segments: any = mutate(this.state.segments, {$splice: [[idx, 1]]});
     this.setState({segments, dirty: true});
+    this.loadChartDataForFields(this.state.fields, this.state.filters, segments);
   }
 
   render() {

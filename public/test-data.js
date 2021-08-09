@@ -182,7 +182,7 @@ var test_data = {
           {
             "isGroupFilter": false,
             "label": "Lookup",
-            "showAllcontacts": false,
+            "showAllContacts": false,
             "isActive": true,
             "fieldId": 4,
             "categories": [
