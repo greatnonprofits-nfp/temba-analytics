@@ -56,7 +56,6 @@ export interface Report {
   id?: number,
   text: string,
   description: string,
-  public: boolean,
   config: ReportConfig
 }
 

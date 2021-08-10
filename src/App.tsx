@@ -32,6 +32,7 @@ interface AnalyticsProps {
     reports: Report[],
     endpoints: {
       createUpdateReport: string,
+      deleteReport: string,
       loadChartsData: string,
     }
   }
@@ -88,7 +89,6 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
           let report: Report = {
             text: title,
             description: description,
-            public: false,
             config: {
               fields: this.state.fields,
               filters: this.state.filters,
@@ -103,9 +103,6 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
               this.setState({
                 reports,
                 currentReport: response.data.report,
-                segments: response.data.report.segments,
-                filters: response.data.report.filters,
-                fields: response.data.report.fields,
                 dirty: false,
               });
             }
@@ -129,7 +126,6 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
               id: this.state.currentReport.id,
               text: title,
               description: description,
-              public: false,
               config: {
                 fields: this.state.fields,
                 filters: this.state.filters,
@@ -168,6 +164,20 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
       isChartDataLoaded: false
     });
     this.loadChartDataForFields(report.config.fields, report.config.filters, report.config.segments);
+  }
+
+  private handleReportRemoved(report: Report) {
+    let reportIdx = this.state.reports.findIndex((_report: Report) => _report.id === report.id);
+    let reports: any = mutate(this.state.reports, {$splice: [[reportIdx, 1]]});
+    this.setState({reports});
+    if (this.props.context.endpoints.deleteReport.length > 0) {
+      axios.delete(this.props.context.endpoints.deleteReport, {
+        headers: this.getRequestHeaders(),
+        data: {
+          report_id: report.id,
+        }
+      });
+    }
   }
 
   private handleFieldUpdated(field: Field, idx?: number) {
@@ -373,7 +383,11 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     return (
       <div className="analytics">
         <div className="controls">
-          <Reports reports={this.state.reports} onReportSelected={this.handleReportSelected.bind(this)}/>
+          <Reports
+            reports={this.state.reports}
+            onReportSelected={this.handleReportSelected.bind(this)}
+            onReportDeleted={this.handleReportRemoved.bind(this)}
+          />
           <FieldSelector flows={this.props.context.flows}
                          fields={this.state.fields}
                          onFieldsSelected={this.handleSelectedFields.bind(this)}

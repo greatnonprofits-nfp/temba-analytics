@@ -2,10 +2,13 @@ import React from "react";
 import "./Reports.scss"
 import {renderIf} from "../../utils";
 import {Report} from "../../utils/types";
+import Controls from "../controls/Controls";
+import mutate from "immutability-helper";
 
 interface ReportsProps {
   reports: Report[],
   onReportSelected: (report: Report) => any,
+  onReportDeleted: (report: Report) => any,
 }
 
 interface ReportsState {
@@ -18,6 +21,10 @@ export default class Reports extends React.Component<ReportsProps, ReportsState>
   constructor(props: ReportsProps) {
     super(props);
     this.state = {reports: this.props.reports, currentReport: null};
+  }
+
+  componentWillReceiveProps(nextProps: ReportsProps) {
+    this.setState({reports: nextProps.reports});
   }
 
   private isReportActive(report: Report) {
@@ -33,6 +40,14 @@ export default class Reports extends React.Component<ReportsProps, ReportsState>
     this.props.onReportSelected(report);
   }
 
+  private onReportRemove(idx: number, report: Report) {
+    if (!!this.props.onReportDeleted) {
+      let reports: any = mutate(this.state.reports, {$splice: [[idx, 1]]});
+      this.setState({reports});
+      this.props.onReportDeleted(report);
+    }
+  }
+
   render() {
     return <div className="reports-container">
       {renderIf(this.state.reports.length > 0)(
@@ -43,13 +58,16 @@ export default class Reports extends React.Component<ReportsProps, ReportsState>
               <div
                 key={idx}
                 className={"report-item" + (this.isReportActive(report) ? " active" : "")}
-                onClick={() => {
-                  this.setReportActive(report);
-                }}
               >
-                <div className="name">
+                <div
+                  className="name"
+                  onClick={() => {
+                    this.setReportActive(report);
+                  }}
+                >
                   {report.text}
                 </div>
+                <Controls onRemoveClicked={() => this.onReportRemove(idx, report)}></Controls>
               </div>
             ))}
           </div>

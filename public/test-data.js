@@ -443,6 +443,7 @@ var test_data = {
   ],
   "endpoints": {
       "createUpdateReport": "",
+      "deleteReport": "",
       "loadChartsData": "",
   }
 };
