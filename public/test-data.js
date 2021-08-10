@@ -445,5 +445,9 @@ var test_data = {
       "createUpdateReport": "",
       "deleteReport": "",
       "loadChartsData": "",
+      "refreshChartsData": "",
+  },
+  "data_status": {
+    "lastUpdated": "2010-01-01", "completed": false, "progress": 0.21
   }
 };

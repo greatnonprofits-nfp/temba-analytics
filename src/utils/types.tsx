@@ -108,3 +108,9 @@ export interface Field {
   table?: any,
   chart?: any,
 }
+
+export interface DataStatus {
+  lastUpdated: string|null,
+  completed: boolean,
+  progress: number,
+}

@@ -7,7 +7,7 @@ import Reports from "./components/reports/Reports";
 import Filters from "./components/filters/Filters";
 import Segments from "./components/segments/Segments";
 import {
-  ChartType,
+  ChartType, DataStatus,
   Field,
   Flow,
   FlowRuleCategory,
@@ -24,16 +24,19 @@ import FlowsPreview from "./components/flows-preview/FlowsPreview";
 import Chart from "./components/chart/Chart";
 import SaveDialog from "./components/save-dialog/SaveDialog";
 import axios from "axios";
+import StatusDialog from "./components/status-dialog/StatusDialog";
 
 interface AnalyticsProps {
   context: {
     flows: Flow[],
     groups: Group[],
     reports: Report[],
+    data_status: DataStatus,
     endpoints: {
       createUpdateReport: string,
       deleteReport: string,
       loadChartsData: string,
+      refreshChartsData: string,
     }
   }
 }
@@ -49,11 +52,15 @@ interface AnalyticsState {
   currentGroupSegment?: any,
   lastGroupSegment?: any,
   isChartDataLoaded: boolean,
-  dialog: {
+  saveDialog: {
     title?: string,
     description?: string,
     isVisible: boolean,
     successCallback?: (title: string, description: string) => any,
+  },
+  statusDialog: {
+    context: DataStatus,
+    isVisible: boolean,
   }
 }
 
@@ -68,7 +75,8 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
       filters: [],
       segments: [],
       dirty: false,
-      dialog: {isVisible: false},
+      saveDialog: {isVisible: false},
+      statusDialog: {isVisible: false, context: this.props.context.data_status},
       isChartDataLoaded: true,
     };
   }
@@ -81,7 +89,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
 
   private saveNewReport() {
     this.setState({
-      dialog: {
+      saveDialog: {
         title: "",
         description: "",
         isVisible: true,
@@ -116,7 +124,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
 
   private saveReport() {
     this.setState({
-      dialog: {
+      saveDialog: {
         title: this.state.currentReport?.text,
         description: this.state.currentReport?.description,
         isVisible: true,
@@ -231,10 +239,12 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     let segment: any = !!activeSegment ? {
       field: activeSegment.fieldId,
       isGroupSegment: activeSegment.isGroupSegment,
-      categories: activeSegment.categories.filter(category => category.isSegment).map(category => {return {
-        id: category.id,
-        label: category.label,
-      }}),
+      categories: activeSegment.categories.filter(category => category.isSegment).map(category => {
+        return {
+          id: category.id,
+          label: category.label,
+        }
+      }),
     } : {};
     let fields = _fields.filter((field: Field) => field.isVisible).map((field: Field) => {
       return {id: field.id}
@@ -431,18 +441,44 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
                 <div className="report-description">{this.state.currentReport?.description}</div>
               </div>
               <div className="control-buttons">
+                <div
+                  className={"status-btn"}
+                  onClick={() => {
+                    let statusDialogState = this.state.statusDialog;
+                    statusDialogState.isVisible = !statusDialogState.isVisible;
+                    this.setState({statusDialog: statusDialogState});
+                  }}
+                ><i className="fas fa-sync"/></div>
                 {renderIf(!!this.state.currentReport)(
                   <Button name={this.state.dirty ? "Save" : "Rename"} onClick={this.saveReport.bind(this)}/>
                 )}
                 <Button name={"New Report"} onClick={this.saveNewReport.bind(this)}/>
               </div>
+              <StatusDialog
+                dataStatus={this.state.statusDialog.context}
+                isVisible={this.state.statusDialog.isVisible}
+                onSubmit={(data) => {
+                  let statusDialog = this.state.statusDialog;
+                  statusDialog.isVisible = false;
+                  axios.post(this.props.context.endpoints.refreshChartsData, data, {headers: this.getRequestHeaders()}).then(response => {
+                    statusDialog.context = response.data;
+                    this.setState({statusDialog});
+                  })
+                  this.setState({statusDialog});
+                }}
+                onClose={() => {
+                  let statusDialog = this.state.statusDialog;
+                  statusDialog.isVisible = false;
+                  this.setState({statusDialog});
+                }}
+              />
               <SaveDialog
-                show={this.state.dialog.isVisible}
-                title={this.state.dialog?.title}
-                description={this.state.dialog?.description}
-                onSubmit={this.state.dialog.successCallback?.bind(this)}
+                show={this.state.saveDialog.isVisible}
+                title={this.state.saveDialog?.title}
+                description={this.state.saveDialog?.description}
+                onSubmit={this.state.saveDialog.successCallback?.bind(this)}
                 onCancel={() => {
-                  this.setState({dialog: {isVisible: false}});
+                  this.setState({saveDialog: {isVisible: false}});
                 }}
               />
             </div>
@@ -455,7 +491,8 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
             />
             <div className="charts">
               {this.state.fields.filter((field: Field) => field.isVisible).map((field: Field, idx: number) => (
-                <Chart key={idx} idx={idx} field={field} isLoaded={this.state.isChartDataLoaded} onFieldUpdated={this.handleFieldUpdated.bind(this)}/>))}
+                <Chart key={idx} idx={idx} field={field} isLoaded={this.state.isChartDataLoaded}
+                       onFieldUpdated={this.handleFieldUpdated.bind(this)}/>))}
             </div>
           </div>
         </div>
