@@ -63,7 +63,8 @@ export interface Report {
 // Flow related data types
 export interface FlowRuleCategory{
   label: string,
-  count: number
+  count?: number,
+  categories?: FlowRuleCategory[]
 }
 
 export interface FlowRule {
@@ -101,7 +102,6 @@ export interface Field {
   chartSize: number,
   chartType: ChartType,
   isVisible: boolean,
-  isLoaded?: boolean,
   showDataTable: boolean,
 
   categories?: FlowRuleCategory[],

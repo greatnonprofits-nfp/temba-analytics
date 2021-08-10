@@ -9,9 +9,15 @@ interface SeriesData {
   y: any,
 }
 
+interface NestedSeriesData {
+  name: string,
+  data: SeriesData[],
+}
+
 interface ChartProps {
   idx: number,
   field: Field,
+  isLoaded: boolean,
   onFieldUpdated?: (field: Field, idx: number) => any,
 }
 
@@ -37,59 +43,55 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
   }
 
   componentDidUpdate(prevProps: Readonly<ChartProps>, prevState: Readonly<ChartState>, snapshot?: any) {
-    let field = this.props.field;
-    this.highchartsObject.reflow();
-    if (field.chartType !== ChartType.Donut) {
-      this.highchartsObject.update({
-        chart: {
-          type: field.chartType
-        },
-        plotOptions: {
-          pie: {
-            size: '100%',
-            innerSize: '0%'
-          }
-        }
-      })
-    } else {
-      this.highchartsObject.update({
-        chart: {
-          type: 'pie',
-        },
-        plotOptions: {
-          pie: {
-            size: '100%',
-            innerSize: '50%'
-          }
-        }
-      })
+    if (this.props.isLoaded) {
+      try {
+        this.highchartsObject.destroy();
+        delete this.highchartsObject;
+      } catch (e) {
+        console.error(e);
+      }
+      this.renderChart();
     }
-    // update charts data
-    let chartsData = this.prepareChartsData();
-    this.highchartsObject.update({
-      xAxis: {
-        categories: chartsData.categories,
-      },
-      series: [{
-        name: 'Contacts',
-        data: chartsData.series,
-      }]
-    });
   }
 
   private prepareChartsData() {
     let colors: any = Highcharts.getOptions().colors;
     let field = this.props.field;
     let categories: string[] = [];
-    let series: SeriesData[] = [];
-    field.categories?.forEach((fieldCategory, idx) => {
-      categories.push(fieldCategory.label);
+    let series: NestedSeriesData[] = [];
+    let hasInnerCategories = !!field.categories ? (field.categories.length > 0 ? !!field.categories[0].categories : false) : false;
+    if (hasInnerCategories) {
+      field.categories?.forEach((segmentCategory, idx) => {
+        let seriesData: SeriesData[] = [];
+        categories = [];
+        segmentCategory.categories?.forEach((fieldCategory) => {
+          categories.push(fieldCategory.label);
+          seriesData.push({
+            name: fieldCategory.label,
+            color: colors[idx % colors.length],
+            y: fieldCategory.count
+          });
+        });
+        series.push({
+          name: segmentCategory.label,
+          data: seriesData
+        })
+      });
+    } else {
+      let seriesData: SeriesData[] = [];
+      field.categories?.forEach((fieldCategory, idx) => {
+        categories.push(fieldCategory.label);
+        seriesData.push({
+          name: fieldCategory.label,
+          color: colors[idx % colors.length],
+          y: fieldCategory.count
+        })
+      });
       series.push({
-        name: fieldCategory.label,
-        color: colors[idx % colors.length],
-        y: fieldCategory.count
+        name: "Contacts",
+        data: seriesData,
       })
-    });
+    }
     return {categories, series};
   }
 
@@ -143,41 +145,93 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
         categories: chartsData.categories,
       },
       yAxis: {
+        allowDecimals: false,
         title: {
           text: 'Contacts'
         }
       },
-      series: [{
-        name: 'Contacts',
-        data: chartsData.series,
-      }]
+      series: chartsData.series,
     };
     this.highchartsObject = Highcharts.chart(this.chartRef.current, options);
   }
 
   private renderDataTable() {
     let field = this.props.field;
-    if (field.showDataTable && field.categories && field.totalResponses) {
-      return (
-        <table>
-          <tbody>
-          {field.categories.map((category, idx) => (
-            <tr key={idx}>
-              <th>{category.label}</th>
-              <td>{category.count}</td>
-              <td>{
-                // @ts-ignore
-                parseInt((category.count / field.totalResponses).toFixed(2) * 100)
-              }%
-              </td>
+    if (field.showDataTable && field.categories) {
+      let hasInnerCategories = !!field.categories ? (field.categories.length > 0 ? !!field.categories[0].categories : false) : false;
+      if (hasInnerCategories) {
+        let totals: any = {};
+        let reversedCategories: any = {};
+        field.categories.forEach(segmentCategory => {
+          // @ts-ignore
+          totals[segmentCategory.label] = segmentCategory.categories.reduce((val, item) => val + (item.count || 0), 0);
+          segmentCategory.categories?.forEach(category => {
+            if (reversedCategories.hasOwnProperty(category.label)) {
+              reversedCategories[category.label].push({label: segmentCategory.label, count: category.count});
+            } else {
+              reversedCategories[category.label] = [{label: segmentCategory.label, count: category.count}];
+            }
+          });
+        });
+        return (
+          <table>
+            <thead>
+            <tr>
+              <th></th>
+              {field.categories.map(
+                (category, idx) => <th
+                  key={idx}
+                  colSpan={2}
+                  className={"datatable-segment" + (idx % 2 !== 0 ? " odd": "")}
+                >{category.label}</th>
+              )}
             </tr>
-          ))}
-          </tbody>
-        </table>
-      )
-    } else {
-      return <></>;
+            </thead>
+            <tbody>
+            {
+              // @ts-ignore
+              Object.entries(reversedCategories).map(([category, segments], idx) => {
+                return (
+                  <tr key={idx}>
+                    <th>{category}</th>
+                    { // @ts-ignore
+                      segments.map((segment: any, idx: number) => <React.Fragment key={idx}>
+                        <td className={"datatable-segment" + (idx % 2 !== 0 ? " odd": "")}>{segment.count}</td>
+                        <td className={"datatable-segment" + (idx % 2 !== 0 ? " odd": "")}>{
+                          // @ts-ignore
+                          parseInt((segment.count / totals[segment.label] || 0).toFixed(2) * 100)
+                        }%
+                        </td>
+                      </React.Fragment>)
+                    }
+                  </tr>
+                )
+              })
+            }
+            </tbody>
+          </table>
+        )
+      } else if (field.totalResponses) {
+        return (
+          <table>
+            <tbody>
+            {field.categories.map((category, idx) => (
+              <tr key={idx}>
+                <th>{category.label}</th>
+                <td>{category.count}</td>
+                <td>{
+                  // @ts-ignore
+                  parseInt((category.count / field.totalResponses).toFixed(2) * 100)
+                }%
+                </td>
+              </tr>
+            ))}
+            </tbody>
+          </table>
+        )
+      }
     }
+    return <></>;
   }
 
   render() {

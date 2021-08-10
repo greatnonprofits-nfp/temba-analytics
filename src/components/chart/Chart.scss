@@ -117,6 +117,12 @@
           vertical-align: top;
           border-top: 1px solid #dddddd;
           color: #333333;
+          &.datatable-segment {
+            background: #ffffff;
+            &.odd {
+              background: #f0f7fc;
+            }
+          }
         }
         th {
           font-weight: normal;
