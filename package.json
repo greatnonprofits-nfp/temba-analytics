@@ -1,7 +1,7 @@
 {
-  "name": "temba-analytics",
+  "name": "@greatnonprofits-nfp/temba-analytics",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "devDependencies": {
     "@greatnonprofits-nfp/temba-components": "0.8.12",
     "moment": "^2.29.1"
@@ -29,7 +29,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts ../rapidpro/node_modules/@greatnonprofits-nfp/temba-analytics/build",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
