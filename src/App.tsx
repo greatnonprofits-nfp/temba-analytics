@@ -389,7 +389,77 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     this.loadChartDataForFields(this.state.fields, this.state.filters, segments);
   }
 
+  private handleOnShowRefreshClicked() {
+    let statusDialogState = this.state.statusDialog;
+    statusDialogState.isVisible = !statusDialogState.isVisible;
+    axios.post(
+      this.props.context.endpoints.refreshChartsData, {onlyStatus: true}, {headers: this.getRequestHeaders()}
+    ).then(response => {
+      statusDialogState.context = response.data;
+      this.setState({statusDialog: statusDialogState});
+    }).catch(() => {
+      this.setState({statusDialog: statusDialogState});
+    });
+  }
+
+  private renderDataStatusDialog() {
+    return (
+      <StatusDialog
+        dataStatus={this.state.statusDialog.context}
+        isVisible={this.state.statusDialog.isVisible}
+        onSubmit={(data, isVisible = false) => {
+          let statusDialog = this.state.statusDialog;
+          statusDialog.isVisible = isVisible;
+          axios.post(this.props.context.endpoints.refreshChartsData, data, {headers: this.getRequestHeaders()})
+            .then(response => {
+              statusDialog.context = response.data;
+              this.setState({statusDialog});
+            });
+          this.setState({statusDialog});
+        }}
+        onClose={() => {
+          let statusDialog = this.state.statusDialog;
+          statusDialog.isVisible = false;
+          this.setState({statusDialog});
+        }}
+      />
+    )
+  }
+
+  private renderSaveReportDialog() {
+    return (
+      <SaveDialog
+        show={this.state.saveDialog.isVisible}
+        title={this.state.saveDialog?.title}
+        description={this.state.saveDialog?.description}
+        onSubmit={this.state.saveDialog.successCallback?.bind(this)}
+        onCancel={() => {
+          this.setState({saveDialog: {isVisible: false}});
+        }}
+      />
+    )
+  }
+
   render() {
+    if (!this.state.statusDialog.context.lastUpdated) {
+      return <div className="analytics">
+        <div className="results full-size">
+          <div className="report-header">
+            <div className="report-title">
+              <div className="report-label">No data to show</div>
+              <div className="report-description">Please check the sync process</div>
+            </div>
+            <div className="control-buttons">
+              <div
+                className={"status-btn"}
+                onClick={this.handleOnShowRefreshClicked.bind(this)}
+              ><i className="fas fa-sync"/></div>
+              {this.renderDataStatusDialog()}
+            </div>
+          </div>
+        </div>
+      </div>
+    }
     return (
       <div className="analytics">
         <div className="controls">
@@ -443,44 +513,15 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
               <div className="control-buttons">
                 <div
                   className={"status-btn"}
-                  onClick={() => {
-                    let statusDialogState = this.state.statusDialog;
-                    statusDialogState.isVisible = !statusDialogState.isVisible;
-                    this.setState({statusDialog: statusDialogState});
-                  }}
+                  onClick={this.handleOnShowRefreshClicked.bind(this)}
                 ><i className="fas fa-sync"/></div>
                 {renderIf(!!this.state.currentReport)(
                   <Button name={this.state.dirty ? "Save" : "Rename"} onClick={this.saveReport.bind(this)}/>
                 )}
                 <Button name={"New Report"} onClick={this.saveNewReport.bind(this)}/>
               </div>
-              <StatusDialog
-                dataStatus={this.state.statusDialog.context}
-                isVisible={this.state.statusDialog.isVisible}
-                onSubmit={(data) => {
-                  let statusDialog = this.state.statusDialog;
-                  statusDialog.isVisible = false;
-                  axios.post(this.props.context.endpoints.refreshChartsData, data, {headers: this.getRequestHeaders()}).then(response => {
-                    statusDialog.context = response.data;
-                    this.setState({statusDialog});
-                  })
-                  this.setState({statusDialog});
-                }}
-                onClose={() => {
-                  let statusDialog = this.state.statusDialog;
-                  statusDialog.isVisible = false;
-                  this.setState({statusDialog});
-                }}
-              />
-              <SaveDialog
-                show={this.state.saveDialog.isVisible}
-                title={this.state.saveDialog?.title}
-                description={this.state.saveDialog?.description}
-                onSubmit={this.state.saveDialog.successCallback?.bind(this)}
-                onCancel={() => {
-                  this.setState({saveDialog: {isVisible: false}});
-                }}
-              />
+              {this.renderDataStatusDialog()}
+              {this.renderSaveReportDialog()}
             </div>
           )}
           <div className="report-body">

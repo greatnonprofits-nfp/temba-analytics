@@ -51,6 +51,10 @@
     height: 100%;
     padding: 20px;
 
+    &.full-size {
+      width: 100%;
+    }
+
     .report-header {
       display: flex;
       flex-direction: row;
