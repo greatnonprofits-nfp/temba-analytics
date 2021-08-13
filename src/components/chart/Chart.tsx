@@ -45,8 +45,10 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
   componentDidUpdate(prevProps: Readonly<ChartProps>, prevState: Readonly<ChartState>, snapshot?: any) {
     if (this.props.isLoaded) {
       try {
-        this.highchartsObject.destroy();
-        delete this.highchartsObject;
+        if (this.highchartsObject) {
+          this.highchartsObject.destroy();
+          delete this.highchartsObject;
+        }
       } catch (e) {
         console.error(e);
       }
@@ -127,6 +129,7 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
 
   private renderChart() {
     let field = this.props.field;
+    if (!field.categories || field.categories.length === 0) return;
     let chartsData = this.prepareChartsData();
     let options: any = {
       chart: {
@@ -182,7 +185,7 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
                 (category, idx) => <th
                   key={idx}
                   colSpan={2}
-                  className={"datatable-segment" + (idx % 2 !== 0 ? " odd": "")}
+                  className={"datatable-segment" + (idx % 2 !== 0 ? " odd" : "")}
                 >{category.label}</th>
               )}
             </tr>
@@ -196,8 +199,8 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
                     <th>{category}</th>
                     { // @ts-ignore
                       segments.map((segment: any, idx: number) => <React.Fragment key={idx}>
-                        <td className={"datatable-segment" + (idx % 2 !== 0 ? " odd": "")}>{segment.count}</td>
-                        <td className={"datatable-segment" + (idx % 2 !== 0 ? " odd": "")}>{
+                        <td className={"datatable-segment" + (idx % 2 !== 0 ? " odd" : "")}>{segment.count}</td>
+                        <td className={"datatable-segment" + (idx % 2 !== 0 ? " odd" : "")}>{
                           // @ts-ignore
                           parseInt((segment.count / totals[segment.label] || 0).toFixed(2) * 100)
                         }%
@@ -262,7 +265,7 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
           </div>
         </div>
       </div>
-      <div className={"chart"} ref={this.chartRef}/>
+      <div className={"chart"} ref={this.chartRef}>There is no data to display.</div>
       <div className={"datatable"}>{this.renderDataTable()}</div>
     </div>;
   }
