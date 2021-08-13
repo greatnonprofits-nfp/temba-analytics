@@ -8,6 +8,7 @@ interface SaveDialogProps {
   onSubmit?: (title: string, description: string) => any,
   onCancel?: () => any,
   show?: boolean;
+  existingTitles: string[],
 }
 
 interface SaveDialogState {
@@ -68,8 +69,12 @@ export default class SaveDialog extends React.Component<SaveDialogProps, SaveDia
 
   private handleDialogButtonClicked(evt: any) {
     if (!evt.detail.button.secondary && !!this.props.onSubmit) {
-      if (this.state.title.length === 0 || this.state.description.length === 0) {
-        this.setState({alertError: "Some data is not provided yet."});
+      if (this.state.title.length === 0) {
+        this.setState({alertError: "Title is not provided."});
+        return;
+      }
+      if (this.props.existingTitles.find(title => title === this.state.title)) {
+        this.setState({alertError: "Report with this title already exists."});
         return;
       }
       this.props.onSubmit(this.state.title, this.state.description);
