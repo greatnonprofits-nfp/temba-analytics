@@ -19,7 +19,7 @@ import {
 import Fields from "./components/fields/Fields";
 import Controls from "./components/controls/Controls";
 import Highcharts from "highcharts";
-import {getCookie, renderIf} from "./utils";
+import {getRequestHeaders, renderIf} from "./utils";
 import FlowsPreview from "./components/flows-preview/FlowsPreview";
 import Chart from "./components/chart/Chart";
 import SaveDialog from "./components/save-dialog/SaveDialog";
@@ -81,12 +81,6 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     };
   }
 
-  private getRequestHeaders() {
-    // if we have a csrf in our cookie, pass it along as a header
-    const csrf = getCookie('csrftoken');
-    return csrf ? {'X-CSRFToken': csrf} : {};
-  }
-
   private saveNewReport() {
     this.setState({
       saveDialog: {
@@ -104,7 +98,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
             }
           }
           axios.post(
-            this.props.context.endpoints.createUpdateReport, report, {headers: this.getRequestHeaders()}
+            this.props.context.endpoints.createUpdateReport, report, {headers: getRequestHeaders()}
           ).then((response) => {
             if (response.data.status === "success") {
               let reports: any = mutate(this.state.reports, {$push: [response.data.report]});
@@ -141,7 +135,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
               }
             }
             axios.post(
-              this.props.context.endpoints.createUpdateReport, report, {headers: this.getRequestHeaders()}
+              this.props.context.endpoints.createUpdateReport, report, {headers: getRequestHeaders()}
             ).then((response) => {
               if (response.data.status === "success") {
                 let reports: any = this.state.reports;
@@ -180,10 +174,11 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     this.setState({reports});
     if (this.props.context.endpoints.deleteReport.length > 0) {
       axios.delete(this.props.context.endpoints.deleteReport, {
-        headers: this.getRequestHeaders(),
+        headers: getRequestHeaders(),
         data: {
           report_id: report.id,
         }
+      }).catch(() => {
       });
     }
   }
@@ -253,7 +248,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     // request necessary data
     if (!this.props.context.endpoints.loadChartsData) return;
     axios.post(this.props.context.endpoints.loadChartsData, {fields, filters, segment}, {
-      headers: this.getRequestHeaders()
+      headers: getRequestHeaders()
     }).then((response) => {
       let fields_categories: { id: { flow: number, rule: string }, categories: FlowRuleCategory[] }[] = response.data;
       _fields.forEach((field: Field) => {
@@ -392,38 +387,23 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
   private handleOnShowRefreshClicked() {
     let statusDialogState = this.state.statusDialog;
     statusDialogState.isVisible = !statusDialogState.isVisible;
-    axios.post(
-      this.props.context.endpoints.refreshChartsData, {onlyStatus: true}, {headers: this.getRequestHeaders()}
-    ).then(response => {
-      statusDialogState.context = response.data;
-      this.setState({statusDialog: statusDialogState});
-    }).catch(() => {
-      this.setState({statusDialog: statusDialogState});
-    });
+    this.setState({statusDialog: statusDialogState});
   }
 
   private renderDataStatusDialog() {
     return (
       <StatusDialog
+        refreshUrl={this.props.context.endpoints.refreshChartsData}
         dataStatus={this.state.statusDialog.context}
         isVisible={this.state.statusDialog.isVisible}
-        onSubmit={(data, isVisible = false) => {
-          let statusDialog = this.state.statusDialog;
-          statusDialog.isVisible = isVisible;
-          axios.post(this.props.context.endpoints.refreshChartsData, data, {headers: this.getRequestHeaders()})
-            .then(response => {
-              statusDialog.context = response.data;
-              this.setState({statusDialog});
-            });
-          this.setState({statusDialog});
-        }}
-        onClose={() => {
-          let statusDialog = this.state.statusDialog;
-          statusDialog.isVisible = false;
-          this.setState({statusDialog});
+        onStateChanged={(dataStatus, isVisible, refreshFields) => {
+          this.setState({statusDialog: {isVisible, context: dataStatus}});
+          if (!!refreshFields) {
+            this.loadChartDataForFields(this.state.fields, this.state.filters, this.state.segments);
+          }
         }}
       />
-    )
+    );
   }
 
   private renderSaveReportDialog() {
@@ -436,6 +416,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
         onCancel={() => {
           this.setState({saveDialog: {isVisible: false}});
         }}
+        existingTitles={this.state.reports.map((report ) => report.text)}
       />
     )
   }

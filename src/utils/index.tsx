@@ -5,7 +5,7 @@ export const renderIf = (predicate: boolean) => (then: JSX.Element, otherwise?: 
   predicate ? then : otherwise ? otherwise : null;
 
 /** Get the value for a named cookie */
-export const getCookie = (name: string): string|null => {
+export const getCookie = (name: string): string | null => {
   for (const cookie of document.cookie.split(';')) {
     const idx = cookie.indexOf('=');
     let key = cookie.substr(0, idx);
@@ -21,4 +21,10 @@ export const getCookie = (name: string): string|null => {
   }
   return null;
 };
+
+export const getRequestHeaders = () => {
+  // if we have a csrf in our cookie, pass it along as a header
+  const csrf = getCookie('csrftoken');
+  return csrf ? {'X-CSRFToken': csrf} : {};
+}
 
