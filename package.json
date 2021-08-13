@@ -1,6 +1,6 @@
 {
   "name": "@greatnonprofits-nfp/temba-analytics",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "private": false,
   "devDependencies": {
     "@greatnonprofits-nfp/temba-components": "0.8.12",
