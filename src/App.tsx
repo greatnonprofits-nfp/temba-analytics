@@ -217,7 +217,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     return field;
   }
 
-  private loadChartDataForFields(_fields: Field[], _filters: ReportFilter[], _segments: ReportSegment[]) {
+  private loadChartDataForFields(_fields: Field[], _filters: ReportFilter[], _segments: ReportSegment[], extraState = {}) {
     // prepare request data
     let filters = {
       values: _filters.filter(filter => filter.isActive && !filter.isGroupFilter).map(filter => {
@@ -259,7 +259,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
           field.totalResponses = field.categories.reduce((val, item) => val + (item.count || 0), 0);
         }
       });
-      this.setState({fields: _fields, isChartDataLoaded: true});
+      this.setState({fields: _fields, isChartDataLoaded: true, ...extraState});
     }).catch(reason => console.error(reason));
   }
 
@@ -397,9 +397,17 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
         dataStatus={this.state.statusDialog.context}
         isVisible={this.state.statusDialog.isVisible}
         onStateChanged={(dataStatus, isVisible, refreshFields) => {
-          this.setState({statusDialog: {isVisible, context: dataStatus}});
           if (!!refreshFields) {
-            this.loadChartDataForFields(this.state.fields, this.state.filters, this.state.segments);
+            this.loadChartDataForFields(
+              this.state.fields, this.state.filters, this.state.segments, {
+                statusDialog: {
+                  isVisible,
+                  context: dataStatus
+                }
+              },
+            );
+          } else {
+            this.setState({statusDialog: {isVisible, context: dataStatus}});
           }
         }}
       />
@@ -416,7 +424,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
         onCancel={() => {
           this.setState({saveDialog: {isVisible: false}});
         }}
-        existingTitles={this.state.reports.map((report ) => report.text)}
+        existingTitles={this.state.reports.map((report) => report.text)}
       />
     )
   }

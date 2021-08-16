@@ -63,7 +63,7 @@ export default class StatusDialog extends React.Component<StatusDialogProps, Sta
         }
       }
     };
-    if (!this.state.dataStatus.completed) {
+    if (!this.state.dataStatus.completed && this.state.isVisible) {
       this.modalRef.current.submitting = true;
       this.startAutoRefresh();
     }
@@ -81,7 +81,9 @@ export default class StatusDialog extends React.Component<StatusDialogProps, Sta
         if (newDataStatus.completed) {
           this.stopAutoRefresh();
           this.modalRef.current.submitting = false;
-          this.props.onStateChanged(this.state.dataStatus, false, true);
+          this.props.onStateChanged(newDataStatus, false, true);
+        } else {
+          this.setState({dataStatus: newDataStatus});
         }
       }).catch(() => {
         this.stopAutoRefresh();
