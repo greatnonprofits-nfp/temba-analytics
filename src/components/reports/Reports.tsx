@@ -9,6 +9,7 @@ interface ReportsProps {
   reports: Report[],
   onReportSelected: (report: Report) => any,
   onReportDeleted: (report: Report) => any,
+  readonly?: boolean,
 }
 
 interface ReportsState {
@@ -67,7 +68,9 @@ export default class Reports extends React.Component<ReportsProps, ReportsState>
                 >
                   {report.text}
                 </div>
-                <Controls onRemoveClicked={() => this.onReportRemove(idx, report)}></Controls>
+                {renderIf(!this.props.readonly) (
+                  <Controls onRemoveClicked={() => this.onReportRemove(idx, report)}/>
+                )}
               </div>
             ))}
           </div>

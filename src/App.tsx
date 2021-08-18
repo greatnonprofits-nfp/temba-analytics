@@ -32,6 +32,7 @@ interface AnalyticsProps {
     groups: Group[],
     reports: Report[],
     data_status: DataStatus,
+    readonly?: boolean,
     endpoints: {
       createUpdateReport: string,
       deleteReport: string,
@@ -438,13 +439,15 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
               <div className="report-label">No data to show</div>
               <div className="report-description">Please check the sync process</div>
             </div>
-            <div className="control-buttons">
-              <div
-                className={"status-btn"}
-                onClick={this.handleOnShowRefreshClicked.bind(this)}
-              ><i className="fas fa-sync"/></div>
-              {this.renderDataStatusDialog()}
-            </div>
+            {renderIf(!this.props.context.readonly)(
+              <div className="control-buttons">
+                <div
+                  className={"status-btn"}
+                  onClick={this.handleOnShowRefreshClicked.bind(this)}
+                ><i className="fas fa-sync"/></div>
+                {this.renderDataStatusDialog()}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -456,6 +459,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
             reports={this.state.reports}
             onReportSelected={this.handleReportSelected.bind(this)}
             onReportDeleted={this.handleReportRemoved.bind(this)}
+            readonly={this.props.context.readonly}
           />
           <FieldSelector flows={this.props.context.flows}
                          fields={this.state.fields}
@@ -499,16 +503,18 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
                 <div className="report-label">{this.state.currentReport?.text}</div>
                 <div className="report-description">{this.state.currentReport?.description}</div>
               </div>
-              <div className="control-buttons">
-                <div
-                  className={"status-btn"}
-                  onClick={this.handleOnShowRefreshClicked.bind(this)}
-                ><i className="fas fa-sync"/></div>
-                {renderIf(!!this.state.currentReport)(
-                  <Button name={this.state.dirty ? "Save" : "Rename"} onClick={this.saveReport.bind(this)}/>
-                )}
-                <Button name={"New Report"} onClick={this.saveNewReport.bind(this)}/>
-              </div>
+              {renderIf(!this.props.context.readonly)(
+                <div className="control-buttons">
+                  <div
+                    className={"status-btn"}
+                    onClick={this.handleOnShowRefreshClicked.bind(this)}
+                  ><i className="fas fa-sync"/></div>
+                  {renderIf(!!this.state.currentReport)(
+                    <Button name={this.state.dirty ? "Save" : "Rename"} onClick={this.saveReport.bind(this)}/>
+                  )}
+                  <Button name={"New Report"} onClick={this.saveNewReport.bind(this)}/>
+                </div>
+              )}
               {this.renderDataStatusDialog()}
               {this.renderSaveReportDialog()}
             </div>
