@@ -425,7 +425,13 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
         onCancel={() => {
           this.setState({saveDialog: {isVisible: false}});
         }}
-        existingTitles={this.state.reports.map((report) => report.text)}
+        existingTitles={(() => {
+          let reportNames = this.state.reports.map((report) => report.text);
+          if (!!this.state.saveDialog.title) {
+            reportNames = reportNames.filter(name => name !== this.state.saveDialog.title);
+          }
+          return reportNames;
+        })()}
       />
     )
   }
