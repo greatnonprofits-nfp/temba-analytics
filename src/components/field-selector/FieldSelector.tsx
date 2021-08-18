@@ -2,6 +2,18 @@ import React from "react";
 import Select from "react-select";
 import {Flow} from "../../utils/types";
 
+interface FlowOption {
+  label: string,
+  value: {
+    flow: any,
+    rule: any,
+  }
+}
+
+interface FlowOptionGroup {
+  label: string,
+  options: FlowOption[],
+}
 
 interface FieldSelectorProps {
   flows: Flow[],
@@ -30,6 +42,25 @@ const groupBadgeStyles = {
   lineHeight: '1',
   minWidth: 1,
   padding: '0.16666666666667em 0.5em',
+};
+
+const filterOption = (groupedOptions: any) => ({label, value}: FlowOption, labelSearch: string) => {
+  // default search
+  labelSearch = labelSearch.toLowerCase();
+  if (label.toLowerCase().includes(labelSearch)) return true;
+
+  // check whether option in filtered groups
+  const groupOptions: FlowOptionGroup[] = groupedOptions.filter((group: any) =>
+    group.label.toLocaleLowerCase().includes(labelSearch)
+  );
+  if (groupOptions) {
+    return groupOptions.some(
+      groupOption => groupOption.options.some(
+        opt => opt.value.flow === value.flow && opt.value.rule === value.rule
+      )
+    );
+  }
+  return false;
 };
 
 export default class FieldSelector extends React.Component<FieldSelectorProps, FieldSelectorState> {
@@ -109,6 +140,7 @@ export default class FieldSelector extends React.Component<FieldSelectorProps, F
         })
       }}
       options={this.state.allFields}
+      filterOption={filterOption(this.state.allFields)}
       formatGroupLabel={this.formatGroupLabel.bind(this)}
       onChange={this.onOptionSelected.bind(this)}
     />;
