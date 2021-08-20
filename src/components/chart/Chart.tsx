@@ -2,10 +2,12 @@ import React, {createRef} from "react";
 import {ChartType, Field} from "../../utils/types";
 import Highcharts from "highcharts";
 import "./Chart.scss"
+import {renderIf} from "../../utils";
 
 interface SeriesData {
   name: string,
   color: string,
+  total?: number,
   y: any,
 }
 
@@ -65,12 +67,14 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
     if (hasInnerCategories) {
       field.categories?.forEach((segmentCategory, idx) => {
         let seriesData: SeriesData[] = [];
+        let totalResponses = (segmentCategory.categories ?? []).reduce((val, item) => val + (item.count || 0), 0);
         categories = [];
         segmentCategory.categories?.forEach((fieldCategory) => {
           categories.push(fieldCategory.label);
           seriesData.push({
             name: fieldCategory.label,
             color: colors[idx % colors.length],
+            total: totalResponses,
             y: fieldCategory.count
           });
         });
@@ -86,7 +90,8 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
         seriesData.push({
           name: fieldCategory.label,
           color: colors[idx % colors.length],
-          y: fieldCategory.count
+          total: field.totalResponses,
+          y: fieldCategory.count,
         })
       });
       series.push({
@@ -94,7 +99,7 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
         data: seriesData,
       })
     }
-    return {categories, series};
+    return {categories, series, colors};
   }
 
   private renderChartSizeControl(size: number) {
@@ -135,8 +140,19 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
       chart: {
         type: field.chartType === ChartType.Donut ? 'pie' : field.chartType,
       },
+      legend: {
+        enabled: chartsData.series.length !== 1,
+      },
       plotOptions: {
+        bar: {
+          shadow: false,
+        },
+        column: {
+          shadow: false,
+        },
         pie: {
+          allowPointSelect: true,
+          cursor: 'pointer',
           size: '100%',
           innerSize: field.chartType === ChartType.Donut ? '50%' : '0%',
         }
@@ -144,14 +160,27 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
       title: {
         text: ''
       },
+      tooltip:{
+        formatter: function (): any {
+          // @ts-ignore
+          return `<b>${this.key}</b>: ${this.y}`;
+        }
+      },
+      credits: {
+        enabled: false,
+      },
       xAxis: {
+        labels: {
+          style: {
+            fontWeight: '200'
+          }
+        },
         categories: chartsData.categories,
       },
       yAxis: {
         allowDecimals: false,
-        title: {
-          text: 'Contacts'
-        }
+        labels: {enabled: false},
+        title: {text: ''},
       },
       series: chartsData.series,
     };
@@ -242,7 +271,7 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
     return <div className={"chart-container" + (field.chartSize === 1 ? " small" : "")} ref={this.containerRef}>
       <div className={"chart-title"}>
         {field.label}
-        <div className={"responses"}>{field.totalResponses || 0} responses</div>
+        {renderIf(!!field.totalResponses)(<div className={"responses"}>{field.totalResponses} responses</div>)}
       </div>
       <div className={"chart-options"}>
         <div className={"chart-sizes"}>
