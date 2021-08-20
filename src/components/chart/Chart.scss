@@ -117,6 +117,9 @@
           vertical-align: top;
           border-top: 1px solid #dddddd;
           color: #333333;
+          &.text-left {
+            text-align: left;
+          }
           &.datatable-segment {
             background: #ffffff;
             &.odd {

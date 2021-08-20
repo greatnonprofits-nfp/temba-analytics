@@ -261,7 +261,7 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
               Object.entries(reversedCategories).map(([category, segments], idx) => {
                 return (
                   <tr key={idx}>
-                    <th>{category}</th>
+                    <th className={"text-left"}>{category}</th>
                     { // @ts-ignore
                       segments.map((segment: any, idx: number) => <React.Fragment key={idx}>
                         <td className={"datatable-segment" + (idx % 2 !== 0 ? " odd" : "")}>{segment.count}</td>
@@ -285,9 +285,9 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
             <tbody>
             {field.categories.map((category, idx) => (
               <tr key={idx}>
-                <th>{category.label}</th>
-                <td>{category.count}</td>
-                <td>{
+                <th className={"text-left"}>{category.label}</th>
+                <td className={"datatable-segment"}>{category.count}</td>
+                <td className={"datatable-segment"}>{
                   // @ts-ignore
                   parseInt((category.count / field.totalResponses).toFixed(2) * 100)
                 }%
