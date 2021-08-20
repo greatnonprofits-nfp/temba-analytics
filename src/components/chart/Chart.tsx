@@ -95,7 +95,7 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
         })
       });
       series.push({
-        name: "Contacts",
+        name: "All Responses",
         data: seriesData,
       })
     }
@@ -140,14 +140,13 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
       chart: {
         type: field.chartType === ChartType.Donut ? 'pie' : field.chartType,
       },
-      legend: {
-        enabled: chartsData.series.length !== 1,
-      },
       plotOptions: {
         bar: {
+          colorByPoint: true,
           shadow: false,
         },
         column: {
+          colorByPoint: true,
           shadow: false,
         },
         pie: {
@@ -155,12 +154,22 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
           cursor: 'pointer',
           size: '100%',
           innerSize: field.chartType === ChartType.Donut ? '50%' : '0%',
+          dataLabels: {
+            enabled: true,
+            color: "#888",
+            connectorColor: "#888",
+            style: {textShadow: "none"},
+            formatter: function (): any {
+              // @ts-ignore
+              return this.point.percentage <= 0 ? null : `<b>${this.point.name}</b> ${Math.round(this.point.percentage)}%`;
+            }
+          }
         }
       },
       title: {
         text: ''
       },
-      tooltip:{
+      tooltip: {
         formatter: function (): any {
           // @ts-ignore
           return `<b>${this.key}</b>: ${this.y}`;
@@ -182,8 +191,35 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
         labels: {enabled: false},
         title: {text: ''},
       },
-      series: chartsData.series,
+      series: [],
     };
+    if (chartsData.series.length > 1) {
+      options.plotOptions.bar.colorByPoint = false;
+      options.plotOptions.column.colorByPoint = false;
+      options.tooltip.formatter = function (): any {
+        // @ts-ignore
+        return `<b>${this.series.name} - ${this.key}</b>: ${this.y}`;
+      }
+    }
+    let seriesCount = chartsData.series.length;
+    let innerSize = field.chartType === "donut" ? 35 : 0;
+    let sizeStep = (100 - innerSize) / (seriesCount || 1);
+    let lastSize = 100;
+    chartsData.series.forEach((seriesItem, seriesIdx) => {
+      if (field.chartType === "pie" || field.chartType === "donut") {
+        let pieSeries: any = seriesItem;
+        if (seriesCount > 1) {
+          pieSeries.size = lastSize + "%";
+          innerSize = lastSize - sizeStep;
+          lastSize = innerSize;
+
+        }
+        pieSeries.innerSize = `${innerSize}%`;
+        options.series.push(pieSeries);
+      } else if (field.chartType === "bar" || field.chartType === "column") {
+        options.series.push(seriesItem);
+      }
+    });
     this.highchartsObject = Highcharts.chart(this.chartRef.current, options);
   }
 
