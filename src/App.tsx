@@ -428,6 +428,17 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     )
   }
 
+  private getGroupedFields() {
+    return Object.entries(this.state.fields.reduce((accu: any, field) => {
+      let flow = field.id.flow;
+      if (!accu[flow]) {
+        accu[flow] = [];
+      }
+      accu[flow].push(field);
+      return accu
+    }, {}));
+  }
+
   render() {
     if (!this.state.statusDialog.context.lastUpdated) {
       return <div className="analytics">
@@ -524,9 +535,28 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
               onFieldsSelected={this.handleSelectedFields.bind(this)}
             />
             <div className="charts">
-              {this.state.fields.filter((field: Field) => field.isVisible).map((field: Field, idx: number) => (
-                <Chart key={idx} idx={idx} field={field} isLoaded={this.state.isChartDataLoaded}
-                       onFieldUpdated={this.handleFieldUpdated.bind(this)}/>))}
+              {this.getGroupedFields().map(([flowId, fields], idx) => {
+                let flow = this.props.context.flows.find((flow) => flow.id.toString() === flowId);
+                return <div key={idx} className={"flow-charts"}>
+                  {
+                    // @ts-ignore
+                    renderIf(!!flow)(<div className={"flow-title"}>{flow.text}</div>)
+                  }
+                  <div className={"flow-body"}>
+                    {
+                      // @ts-ignore
+                      fields.filter((field: Field) => field.isVisible).map((field: Field, fieldIdx: number) => (
+                        <Chart key={fieldIdx}
+                               idx={fieldIdx}
+                               field={field}
+                               isLoaded={this.state.isChartDataLoaded}
+                               onFieldUpdated={this.handleFieldUpdated.bind(this)}
+                        />
+                      ))
+                    }
+                  </div>
+                </div>;
+              })}
             </div>
           </div>
         </div>
