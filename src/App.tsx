@@ -47,7 +47,7 @@ interface AnalyticsState {
   reports: Report[],
   filters: ReportFilter[],
   segments: ReportSegment[],
-  fields: any[],
+  fields: Field[],
   dirty: boolean,
   currentReport?: Report,
   currentGroupSegment?: any,
@@ -208,13 +208,6 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
     }
 
     field.isVisible = visible ? visible : field.isVisible;
-    field.table = null
-    field.chart = {
-      segments: [],
-      categories: [],
-      chartType: chartType,
-      total: 0
-    }
     return field;
   }
 
@@ -257,7 +250,6 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
           .find(item => item.id.flow === field.id.flow && item.id.rule === field.id.rule);
         if (field_categories) {
           field.categories = field_categories.categories;
-          field.totalResponses = field.categories.reduce((val, item) => val + (item.count || 0), 0);
         }
       });
       this.setState({fields: _fields, isChartDataLoaded: true, ...extraState});

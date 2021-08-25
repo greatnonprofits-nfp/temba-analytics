@@ -24,6 +24,7 @@ interface ChartProps {
 }
 
 interface ChartState {
+  totalResponses: number;
 }
 
 
@@ -35,9 +36,9 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
 
   constructor(props: ChartProps) {
     super(props);
-    this.state = {};
     this.chartRef = createRef();
     this.containerRef = createRef();
+    this.state = {totalResponses: this.getTotalResponses(this.props)};
   }
 
   componentDidMount() {
@@ -56,6 +57,26 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
       }
       this.renderChart();
     }
+  }
+
+  componentWillReceiveProps(nextProps: Readonly<ChartProps>, nextContext: any) {
+    this.setState({totalResponses: this.getTotalResponses(nextProps)});
+  }
+
+  private getTotalResponses(props: any) {
+    let totalResponses = 0;
+    let field: Field = props.field;
+    let hasInnerCategories = !!field.categories ? (field.categories.length > 0 ? !!field.categories[0].categories : false) : false;
+    if (!!field.categories) {
+      if (hasInnerCategories) {
+        totalResponses = field.categories.reduce((val, category) => {
+          return val + (category.categories?.reduce((innerVal, item) => innerVal + (item.count || 0), 0) || 0);
+        }, 0);
+      } else {
+        totalResponses = field.categories.reduce((val, item) => val + (item.count || 0), 0);
+      }
+    }
+    return totalResponses;
   }
 
   private prepareChartsData() {
@@ -85,12 +106,13 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
       });
     } else {
       let seriesData: SeriesData[] = [];
+      let totalResponses = this.state.totalResponses;
       field.categories?.forEach((fieldCategory, idx) => {
         categories.push(fieldCategory.label);
         seriesData.push({
           name: fieldCategory.label,
           color: colors[idx % colors.length],
-          total: field.totalResponses,
+          total: totalResponses,
           y: fieldCategory.count,
         })
       });
@@ -223,7 +245,7 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
     this.highchartsObject = Highcharts.chart(this.chartRef.current, options);
   }
 
-  private renderDataTable() {
+  private renderDataTable(totalResponses = 0) {
     let field = this.props.field;
     if (field.showDataTable && field.categories) {
       let hasInnerCategories = !!field.categories ? (field.categories.length > 0 ? !!field.categories[0].categories : false) : false;
@@ -279,7 +301,7 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
             </tbody>
           </table>
         )
-      } else if (field.totalResponses) {
+      } else if (totalResponses) {
         return (
           <table>
             <tbody>
@@ -289,7 +311,7 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
                 <td className={"datatable-segment"}>{category.count}</td>
                 <td className={"datatable-segment"}>{
                   // @ts-ignore
-                  parseInt((category.count / field.totalResponses).toFixed(2) * 100)
+                  parseInt((category.count / totalResponses).toFixed(2) * 100)
                 }%
                 </td>
               </tr>
@@ -304,10 +326,11 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
 
   render() {
     let field: Field = this.props.field;
+    let totalResponses = this.state.totalResponses;
     return <div className={"chart-container" + (field.chartSize === 1 ? " small" : "")} ref={this.containerRef}>
       <div className={"chart-title"}>
         {field.label}
-        {renderIf(!!field.totalResponses)(<div className={"responses"}>{field.totalResponses} responses</div>)}
+        {renderIf(!!totalResponses)(<div className={"responses"}>{totalResponses} responses</div>)}
       </div>
       <div className={"chart-options"}>
         <div className={"chart-sizes"}>
@@ -331,7 +354,7 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
         </div>
       </div>
       <div className={"chart"} ref={this.chartRef}>There is no data to display.</div>
-      <div className={"datatable"}>{this.renderDataTable()}</div>
+      <div className={"datatable"}>{this.renderDataTable(totalResponses)}</div>
     </div>;
   }
 }

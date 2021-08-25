@@ -12,7 +12,6 @@ export interface ReportField {
   chartType: ChartType,
   chartSize: number,
   isVisible: boolean,
-  showChoropleth: boolean,
   showDataTable: boolean
 }
 
@@ -95,7 +94,7 @@ export interface Group {
 
 // Other types
 
-export interface Field {
+export interface Field extends ReportField{
   id: any,
   label: string,
   chartSize: number,
@@ -104,9 +103,6 @@ export interface Field {
   showDataTable: boolean,
 
   categories?: FlowRuleCategory[],
-  totalResponses?: number,
-  table?: any,
-  chart?: any,
 }
 
 export interface DataStatus {
