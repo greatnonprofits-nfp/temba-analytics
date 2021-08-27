@@ -218,6 +218,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
         return {
           field: filter.fieldId,
           categories: filter.categories.filter(category => category.isFilter).map(category => category.label),
+          excludedCategories: filter.categories.filter(category => !category.isFilter).map(category => category.label)
         }
       }),
       groups: _filters.filter(filter => filter.isActive && filter.isGroupFilter && !filter.showAllContacts).map(filter => {
