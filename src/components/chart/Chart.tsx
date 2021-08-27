@@ -239,6 +239,17 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
         pieSeries.innerSize = `${innerSize}%`;
         options.series.push(pieSeries);
       } else if (field.chartType === "bar" || field.chartType === "column") {
+        seriesItem.data.forEach((value: any) => {
+          let total = this.state.totalResponses;
+          let percentage = parseInt(((total ? (value.y / total) : 0 as any).toFixed(2) * 100).toString())
+          value.dataLabels = {
+            enabled: true,
+            color: "#fff",
+            x: 0,
+            y: percentage > 15 ? 25 : 0,
+            formatter: function (): any {return `${percentage}%`}
+          };
+        });
         options.series.push(seriesItem);
       }
     });
