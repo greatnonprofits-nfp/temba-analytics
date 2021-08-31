@@ -430,12 +430,12 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
   }
 
   private getGroupedFields() {
-    return Object.entries(this.state.fields.reduce((accu: any, field) => {
+    return Object.entries(this.state.fields.reduce((accu: any, field, actualIdx) => {
       let flow = field.id.flow;
       if (!accu[flow]) {
         accu[flow] = [];
       }
-      accu[flow].push(field);
+      accu[flow].push([actualIdx, field]);
       return accu
     }, {}));
   }
@@ -546,8 +546,8 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
                   <div className={"flow-body"}>
                     {
                       // @ts-ignore
-                      fields.filter((field: Field) => field.isVisible).map((field: Field, fieldIdx: number) => (
-                        <Chart key={fieldIdx}
+                      fields.filter(([_, field]) => field.isVisible).map(([fieldIdx, field], keyIdx) => (
+                        <Chart key={keyIdx}
                                idx={fieldIdx}
                                field={field}
                                isLoaded={this.state.isChartDataLoaded}
