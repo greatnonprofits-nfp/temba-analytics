@@ -2,7 +2,7 @@ import React from "react";
 import {renderIf} from "../../utils";
 import "./Fields.scss"
 import CheckBox from "../checkbox/CheckBox";
-import {Field, ReportFilter, ReportSegment} from "../../utils/types";
+import {Field, FilterCategory, ReportFilter, ReportSegment, SegmentCategory} from "../../utils/types";
 import Controls from "../controls/Controls";
 import mutate from "immutability-helper";
 import Highcharts from "highcharts";
@@ -46,37 +46,47 @@ export default class Fields extends React.Component<FieldsProps, FieldsState> {
   private handleOnSegmentClicked(field: Field) {
     if (!!this.props.onSegmentCreated) {
       let colors: any = Highcharts.getOptions().colors;
-      this.props.onSegmentCreated({
-        fieldId: field.id,
-        isSegment: true,
-        isGroupSegment: false,
-        label: field.label,
-        categories: !!field.categories ? field.categories.map((category: any) => {
+      let categories: SegmentCategory[] = [];
+      if (!!field.categories && field.categories.length > 0) {
+        let _categories = field.categories[0].categories ?? field.categories;
+        categories = _categories.map((category: any) => {
           return {
             label: category.label,
             isSegment: true,
             color: colors[((field.categories || []).length) % colors.length],
           }
-        }) : []
+        });
+      }
+      this.props.onSegmentCreated({
+        fieldId: field.id,
+        isSegment: true,
+        isGroupSegment: false,
+        label: field.label,
+        categories: categories,
       });
     }
   }
 
   private handleOnFilterClicked(field: Field) {
     if (!!this.props.onFilterCreated) {
+      let categories: FilterCategory[] = [];
+      if (!!field.categories && field.categories.length > 0) {
+        let _categories = field.categories[0].categories ?? field.categories;
+        categories = _categories.map((category: any) => {
+          return {
+            label: category.label,
+            contacts: category.contacts,
+            isFilter: true,
+          }
+        });
+      }
       this.props.onFilterCreated({
         fieldId: field.id,
         isActive: true,
         label: field.label,
         isGroupFilter: false,
         showAllContacts: false,
-        categories: !!field.categories ? field.categories.map((category: any) => {
-          return {
-            label: category.label,
-            contacts: category.contacts,
-            isFilter: true,
-          }
-        }) : []
+        categories: categories,
       });
     }
   }
@@ -96,6 +106,7 @@ export default class Fields extends React.Component<FieldsProps, FieldsState> {
                   label={field.label}
                   checked={field.isVisible}
                   onChecked={(checked) => {
+                    // @ts-ignore
                     this.handleFieldUpdated(idx, field, checked)
                   }}/>
                 <Controls
