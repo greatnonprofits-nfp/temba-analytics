@@ -18,7 +18,7 @@ export interface ReportField {
 export interface FilterCategory {
   id?: number,
   label: string,
-  isFilter: boolean
+  isFilter: boolean|null,
 }
 
 export interface ReportFilter {
