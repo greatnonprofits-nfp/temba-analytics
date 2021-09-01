@@ -161,6 +161,7 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
     let options: any = {
       chart: {
         type: field.chartType === ChartType.Donut ? 'pie' : field.chartType,
+        zoomType: 'x',
       },
       plotOptions: {
         bar: {
@@ -247,7 +248,9 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
             color: "#fff",
             x: 0,
             y: percentage > 15 ? 25 : 0,
-            formatter: function (): any {return `${percentage}%`}
+            formatter: function (): any {
+              return `${percentage}%`
+            }
           };
         });
         options.series.push(seriesItem);
