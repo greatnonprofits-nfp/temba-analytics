@@ -142,7 +142,7 @@ export default class Chart extends React.Component<ChartProps, ChartState> {
     let field = this.props.field;
     let currentType = this.props.field.chartType;
     return <div
-      className={"chart-type" + (type === currentType ? " active" : "")}
+      className={`chart-type type-${type}${type === currentType ? " active" : ""}`}
       onClick={() => {
         if (type !== currentType && !!this.props.onFieldUpdated) {
           field.chartType = type;
