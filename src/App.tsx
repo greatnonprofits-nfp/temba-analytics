@@ -489,6 +489,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
               />
               <Fields
                 fields={this.state.fields}
+                flows={this.props.context.flows}
                 onFieldRemoved={this.handleFieldRemoved.bind(this)}
                 onFieldUpdated={this.handleFieldUpdated.bind(this)}
                 onFilterCreated={this.handleFilterCreated.bind(this)}

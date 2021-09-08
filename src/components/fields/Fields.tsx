@@ -2,13 +2,14 @@ import React from "react";
 import {renderIf} from "../../utils";
 import "./Fields.scss"
 import CheckBox from "../checkbox/CheckBox";
-import {Field, FilterCategory, ReportFilter, ReportSegment, SegmentCategory} from "../../utils/types";
+import {Field, FilterCategory, Flow, ReportFilter, ReportSegment, SegmentCategory} from "../../utils/types";
 import Controls from "../controls/Controls";
 import mutate from "immutability-helper";
 import Highcharts from "highcharts";
 
 interface FieldsProps {
   fields: Field[],
+  flows: Flow[],
   onFieldRemoved?: (field: Field) => any,
   onFieldUpdated?: (field: Field) => any,
   onSegmentCreated?: (segment: ReportSegment) => any,
@@ -91,37 +92,59 @@ export default class Fields extends React.Component<FieldsProps, FieldsState> {
     }
   }
 
+  private getGroupedFields() {
+    return Object.entries(this.state.fields.reduce((accu: any, field, actualIdx) => {
+      let flow = field.id.flow;
+      if (!accu[flow]) {
+        accu[flow] = [];
+      }
+      accu[flow].push([actualIdx, field]);
+      return accu
+    }, {}));
+  }
+
   render() {
     return <div className="fields-container">
       {renderIf(this.state.fields.length > 0)(
         <>
           <div className="title">Charts</div>
           <div className="inner-scroll">
-            {this.state.fields.map((field: Field, idx) => (
-              <div
-                key={idx}
-                className={"field-item" + (field.isVisible ? "" : " inactive")}
-              >
-                <CheckBox
-                  label={field.label}
-                  checked={field.isVisible}
-                  onChecked={(checked) => {
-                    // @ts-ignore
-                    this.handleFieldUpdated(idx, field, checked)
-                  }}/>
-                <Controls
-                  onSegmentClicked={() => {
-                    this.handleOnSegmentClicked(field)
-                  }}
-                  onFilterClicked={() => {
-                    this.handleOnFilterClicked(field)
-                  }}
-                  onRemoveClicked={() => {
-                    this.handleFieldRemoved(idx, field)
-                  }}
-                />
-              </div>
-            ))}
+            {this.getGroupedFields().map(([flowId, fields], idx) => {
+              let flow = this.props.flows.find((flow) => flow.id.toString() === flowId);
+              return <React.Fragment key={idx}>
+                {
+                  // @ts-ignore
+                  renderIf(!!flow)(<div className={"flow-title"}>{flow.text}</div>)
+                }
+                { // @ts-ignore
+                  fields.map(([fieldIdx, field], keyIdx: number) => (
+                    <div
+                      key={keyIdx}
+                      className={"field-item" + (field.isVisible ? "" : " inactive")}
+                    >
+                      <CheckBox
+                        label={field.label}
+                        checked={field.isVisible}
+                        onChecked={(checked) => {
+                          // @ts-ignore
+                          this.handleFieldUpdated(fieldIdx, field, checked)
+                        }}/>
+                      <Controls
+                        onSegmentClicked={() => {
+                          this.handleOnSegmentClicked(field)
+                        }}
+                        onFilterClicked={() => {
+                          this.handleOnFilterClicked(field)
+                        }}
+                        onRemoveClicked={() => {
+                          this.handleFieldRemoved(idx, field)
+                        }}
+                      />
+                    </div>
+                  ))
+                }
+              </React.Fragment>;
+            })}
           </div>
         </>
       )}
