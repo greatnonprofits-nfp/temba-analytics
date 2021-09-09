@@ -112,10 +112,7 @@ export default class Fields extends React.Component<FieldsProps, FieldsState> {
             {this.getGroupedFields().map(([flowId, fields], idx) => {
               let flow = this.props.flows.find((flow) => flow.id.toString() === flowId);
               return <React.Fragment key={idx}>
-                {
-                  // @ts-ignore
-                  renderIf(!!flow)(<div className={"flow-title"}>{flow.text}</div>)
-                }
+                {!!flow ? <div className={"flow-title"}>{flow.text}</div> : ""}
                 { // @ts-ignore
                   fields.map(([fieldIdx, field], keyIdx: number) => (
                     <div

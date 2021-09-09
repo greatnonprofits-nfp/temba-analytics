@@ -25,6 +25,8 @@ import Chart from "./components/chart/Chart";
 import SaveDialog from "./components/save-dialog/SaveDialog";
 import axios from "axios";
 import StatusDialog from "./components/status-dialog/StatusDialog";
+import GearMenu from "./components/gear-menu/GearMenu";
+import GearMenuItem from "./components/gear-menu/GearMenuItem";
 
 interface AnalyticsProps {
   context: {
@@ -516,14 +518,12 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
               </div>
               {renderIf(!this.props.context.readonly)(
                 <div className="control-buttons">
-                  <div
-                    className={"status-btn"}
-                    onClick={this.handleOnShowRefreshClicked.bind(this)}
-                  ><i className="fas fa-sync"/></div>
-                  {renderIf(!!this.state.currentReport)(
-                    <Button name={this.state.dirty ? "Save" : "Rename"} onClick={this.saveReport.bind(this)}/>
-                  )}
-                  <Button name={"New Report"} onClick={this.saveNewReport.bind(this)}/>
+                  <GearMenu>
+                    <GearMenuItem title={"Refresh Data"} onItemClicked={this.handleOnShowRefreshClicked.bind(this)}/>
+                    <GearMenuItem title={"New Report"} onItemClicked={this.saveNewReport.bind(this)}/>
+                    <GearMenuItem title={`${this.state.dirty ? "Save" : "Rename"} Report`} onItemClicked={this.saveReport.bind(this)} hidden={!this.state.currentReport}/>
+                    <GearMenuItem title={"Manage Flows"} onItemClicked={() => {}}/>
+                  </GearMenu>
                 </div>
               )}
               {this.renderDataStatusDialog()}
@@ -540,10 +540,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
               {this.getGroupedFields().map(([flowId, fields], idx) => {
                 let flow = this.props.context.flows.find((flow) => flow.id.toString() === flowId);
                 return <div key={idx} className={"flow-charts"}>
-                  {
-                    // @ts-ignore
-                    renderIf(!!flow)(<div className={"flow-title"}>{flow.text}</div>)
-                  }
+                  {!!flow ? <div className={"flow-title"}>{flow.text}</div> : ""}
                   <div className={"flow-body"}>
                     {
                       // @ts-ignore
