@@ -14,7 +14,7 @@ interface SaveDialogProps {
 interface SaveDialogState {
   title: string,
   description: string,
-  alertError: string,
+  errorAlert: string,
   isOpen: boolean,
 }
 
@@ -28,7 +28,7 @@ export default class SaveDialog extends React.Component<SaveDialogProps, SaveDia
     this.state = {
       title: !!this.props.title ? this.props.title: "",
       description: !!this.props.description ? this.props.description: "",
-      alertError: "",
+      errorAlert: "",
       isOpen: !!this.props.show,
     };
     this.modalRef = createRef();
@@ -60,21 +60,21 @@ export default class SaveDialog extends React.Component<SaveDialogProps, SaveDia
   }
 
   private handleTitleChanged() {
-    this.setState({title: this.titleRef.current.value, alertError: ""});
+    this.setState({title: this.titleRef.current.value, errorAlert: ""});
   }
 
   private handleDescriptionChanged() {
-    this.setState({description: this.descriptionRef.current.value, alertError: ""});
+    this.setState({description: this.descriptionRef.current.value, errorAlert: ""});
   }
 
   private handleDialogButtonClicked(evt: any) {
     if (!evt.detail.button.secondary && !!this.props.onSubmit) {
       if (this.state.title.length === 0) {
-        this.setState({alertError: "Title is not provided."});
+        this.setState({errorAlert: "Title is not provided."});
         return;
       }
       if (this.props.existingTitles.find(title => title === this.state.title)) {
-        this.setState({alertError: "Report with this title already exists."});
+        this.setState({errorAlert: "Report with this title already exists."});
         return;
       }
       this.props.onSubmit(this.state.title, this.state.description);
@@ -90,8 +90,8 @@ export default class SaveDialog extends React.Component<SaveDialogProps, SaveDia
       hideOnClick={false}
     >
       <div className="p-6 body">
-        {renderIf(this.state.alertError.length !== 0)(
-          <div className={"alert-error"}>{this.state.alertError}</div>
+        {renderIf(this.state.errorAlert.length !== 0)(
+          <div className={"error-alert"}>{this.state.errorAlert}</div>
         )}
         <div className="report-title">
           <label>Title</label>
