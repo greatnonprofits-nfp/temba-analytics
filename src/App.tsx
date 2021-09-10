@@ -66,7 +66,8 @@ interface AnalyticsState {
   statusDialog: {
     context: DataStatus,
     isVisible: boolean,
-  }
+  },
+  flowsConfigDialog: { isVisible: boolean },
 }
 
 class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
@@ -82,6 +83,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
       dirty: false,
       saveDialog: {isVisible: false},
       statusDialog: {isVisible: false, context: this.props.context.data_status},
+      flowsConfigDialog: {isVisible: false},
       isChartDataLoaded: true,
     };
   }
@@ -408,6 +410,7 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
             this.setState({statusDialog: {isVisible, context: dataStatus}});
           }
         }}
+        availableFlows={this.props.context.flows}
       />
     );
   }
@@ -431,6 +434,21 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
         })()}
       />
     )
+  }
+
+  private renderFlowsConfigDialog() {
+    return <FlowsDialog
+      isVisible={this.state.flowsConfigDialog.isVisible}
+      selectedFlows={this.props.context.flows}
+      allFlows={this.props.context.available_flows}
+      submitUrl={this.props.context.endpoints.configureFlows}
+      onSuccess={() => {
+        document.location.reload();
+      }}
+      onCancel={() => {
+        this.setState({flowsConfigDialog: {isVisible: false}});
+      }}
+    />
   }
 
   private getGroupedFields() {
@@ -537,13 +555,17 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
                   <GearMenu>
                     <GearMenuItem title={"Refresh Data"} onItemClicked={this.handleOnShowRefreshClicked.bind(this)}/>
                     <GearMenuItem title={"New Report"} onItemClicked={this.saveNewReport.bind(this)}/>
-                    <GearMenuItem title={`${this.state.dirty ? "Save" : "Rename"} Report`} onItemClicked={this.saveReport.bind(this)} hidden={!this.state.currentReport}/>
-                    <GearMenuItem title={"Manage Flows"} onItemClicked={() => {}}/>
+                    <GearMenuItem title={`${this.state.dirty ? "Save" : "Rename"} Report`}
+                                  onItemClicked={this.saveReport.bind(this)} hidden={!this.state.currentReport}/>
+                    <GearMenuItem title={"Manage Flows"} onItemClicked={() => {
+                      this.setState({flowsConfigDialog: {isVisible: true}})
+                    }}/>
                   </GearMenu>
                 </div>
               )}
               {this.renderDataStatusDialog()}
               {this.renderSaveReportDialog()}
+              {this.renderFlowsConfigDialog()}
             </div>
           )}
           <div className="report-body">

@@ -96,6 +96,10 @@ export default class FlowsDialog extends React.Component<FlowsDialogProps, Flows
           searchable={true}
           placeholder={"Select the flows"}
           styles={{
+            valueContainer: (provided: any) => ({
+              ...provided,
+              padding: "4px",
+            }),
             multiValue: (provided: any) => ({
               ...provided,
               display: "flex",
@@ -123,6 +127,11 @@ export default class FlowsDialog extends React.Component<FlowsDialogProps, Flows
             menu: (provided: any) => ({
               ...provided,
               position: "inherit",
+              padding: "2px",
+            }),
+            menuList: (provided: any) => ({
+              ...provided,
+              padding: "2px",
             }),
             control: (provided: any) => ({
               ...provided,
@@ -130,6 +139,19 @@ export default class FlowsDialog extends React.Component<FlowsDialogProps, Flows
                 borderColor: "var(--color-focus)",
                 background: "var(--color-widget-bg-focused)",
                 boxShadow: "var(--widget-box-shadow-focused)",
+              }
+            }),
+            option: (provided: any) => ({
+              ...provided,
+              fontSize: "14px",
+              padding: "5px 0 5px 10px",
+              borderRadius: "4px",
+              marginBottom: "3px",
+              cursor: "pointer",
+              color: "var(--color-text-dark)",
+              background: "var(--color-widget-bg-focused)",
+              "&:hover": {
+                background: "var(--color-selection)",
               }
             }),
           }}
