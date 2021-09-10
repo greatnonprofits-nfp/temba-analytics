@@ -1,3 +1,164 @@
+var flow_1 = {
+  "rules": [
+    {
+      "stats": {
+        "created_on": "2021-07-26T13:57:08.849499+00:00"
+      },
+      "flow": 1,
+      "id": 2,
+      "text": "Lookup Response"
+    },
+    {
+      "stats": {
+        "created_on": "2021-07-26T13:57:08.862929+00:00"
+      },
+      "flow": 1,
+      "id": 5,
+      "text": "Lookup Webhook"
+    },
+    {
+      "stats": {
+        "created_on": "2021-07-26T13:57:08.858821+00:00"
+      },
+      "flow": 1,
+      "id": 4,
+      "text": "Lookup"
+    },
+    {
+      "stats": {
+        "created_on": "2021-07-26T13:57:08.844782+00:00"
+      },
+      "flow": 1,
+      "id": 1,
+      "text": "Comment"
+    },
+    {
+      "stats": {
+        "created_on": "2021-07-26T13:57:08.854672+00:00"
+      },
+      "flow": 1,
+      "id": 3,
+      "text": "Extra Comments"
+    }
+  ],
+  "text": "Sample Flow - Order Status Checker",
+  "stats": {
+    "created_on": "2021-07-26T13:57:08.782887+00:00",
+    "runs": 0
+  },
+  "id": 1
+};
+var flow_2 = {
+  "rules": [
+    {
+      "stats": {
+        "created_on": "2021-07-26T13:57:09.160861+00:00"
+      },
+      "flow": 2,
+      "id": 6,
+      "text": "Take Poll"
+    },
+    {
+      "stats": {
+        "created_on": "2021-07-26T13:57:09.196399+00:00"
+      },
+      "flow": 2,
+      "id": 13,
+      "text": "Extra Comments"
+    },
+    {
+      "stats": {
+        "created_on": "2021-07-26T13:57:09.165213+00:00"
+      },
+      "flow": 2,
+      "id": 7,
+      "text": "Shop Again"
+    },
+    {
+      "stats": {
+        "created_on": "2021-07-26T13:57:09.186778+00:00"
+      },
+      "flow": 2,
+      "id": 11,
+      "text": "Recommend"
+    },
+    {
+      "stats": {
+        "created_on": "2021-07-26T13:57:09.177858+00:00"
+      },
+      "flow": 2,
+      "id": 9,
+      "text": "Suggestion"
+    },
+    {
+      "stats": {
+        "created_on": "2021-07-26T13:57:09.172527+00:00"
+      },
+      "flow": 2,
+      "id": 8,
+      "text": "Gender"
+    },
+    {
+      "stats": {
+        "created_on": "2021-07-26T13:57:09.191328+00:00"
+      },
+      "flow": 2,
+      "id": 12,
+      "text": "Age"
+    },
+    {
+      "stats": {
+        "created_on": "2021-07-26T13:57:09.181765+00:00"
+      },
+      "flow": 2,
+      "id": 10,
+      "text": "Extra Comments"
+    }
+  ],
+  "text": "Sample Flow - Satisfaction Survey",
+  "stats": {
+    "created_on": "2021-07-26T13:57:08.792262+00:00",
+    "runs": 0
+  },
+  "id": 2
+};
+var flow_3 = {
+  "rules": [
+    {
+      "stats": {
+        "created_on": "2021-07-26T13:57:09.344419+00:00"
+      },
+      "flow": 3,
+      "id": 14,
+      "text": "Filter Working"
+    }
+  ],
+  "text": "Sample Flow - Simple Poll",
+  "stats": {
+    "created_on": "2021-07-26T13:57:08.800850+00:00",
+    "runs": 2
+  },
+  "id": 3
+};
+var flow_4 = {
+  "rules": [
+    {
+      "stats": {
+        "created_on": "2021-07-26T13:57:09.460754+00:00"
+      },
+      "flow": 4,
+      "id": 15,
+      "text": "optIn"
+    }
+  ],
+  "text": "Sample Opt-in Flow",
+  "stats": {
+    "created_on": "2021-07-26T13:57:08.810310+00:00",
+    "runs": 0
+  },
+  "id": 4
+};
+
 var test_data = {
   "org_supports_map": null,
   "reports": [
@@ -268,166 +429,16 @@ var test_data = {
   ],
   "current_report": null,
   "flows": [
-    {
-      "rules": [
-        {
-          "stats": {
-            "created_on": "2021-07-26T13:57:08.849499+00:00"
-          },
-          "flow": 1,
-          "id": 2,
-          "text": "Lookup Response"
-        },
-        {
-          "stats": {
-            "created_on": "2021-07-26T13:57:08.862929+00:00"
-          },
-          "flow": 1,
-          "id": 5,
-          "text": "Lookup Webhook"
-        },
-        {
-          "stats": {
-            "created_on": "2021-07-26T13:57:08.858821+00:00"
-          },
-          "flow": 1,
-          "id": 4,
-          "text": "Lookup"
-        },
-        {
-          "stats": {
-            "created_on": "2021-07-26T13:57:08.844782+00:00"
-          },
-          "flow": 1,
-          "id": 1,
-          "text": "Comment"
-        },
-        {
-          "stats": {
-            "created_on": "2021-07-26T13:57:08.854672+00:00"
-          },
-          "flow": 1,
-          "id": 3,
-          "text": "Extra Comments"
-        }
-      ],
-      "text": "Sample Flow - Order Status Checker",
-      "stats": {
-        "created_on": "2021-07-26T13:57:08.782887+00:00",
-        "runs": 0
-      },
-      "id": 1
-    },
-    {
-      "rules": [
-        {
-          "stats": {
-            "created_on": "2021-07-26T13:57:09.160861+00:00"
-          },
-          "flow": 2,
-          "id": 6,
-          "text": "Take Poll"
-        },
-        {
-          "stats": {
-            "created_on": "2021-07-26T13:57:09.196399+00:00"
-          },
-          "flow": 2,
-          "id": 13,
-          "text": "Extra Comments"
-        },
-        {
-          "stats": {
-            "created_on": "2021-07-26T13:57:09.165213+00:00"
-          },
-          "flow": 2,
-          "id": 7,
-          "text": "Shop Again"
-        },
-        {
-          "stats": {
-            "created_on": "2021-07-26T13:57:09.186778+00:00"
-          },
-          "flow": 2,
-          "id": 11,
-          "text": "Recommend"
-        },
-        {
-          "stats": {
-            "created_on": "2021-07-26T13:57:09.177858+00:00"
-          },
-          "flow": 2,
-          "id": 9,
-          "text": "Suggestion"
-        },
-        {
-          "stats": {
-            "created_on": "2021-07-26T13:57:09.172527+00:00"
-          },
-          "flow": 2,
-          "id": 8,
-          "text": "Gender"
-        },
-        {
-          "stats": {
-            "created_on": "2021-07-26T13:57:09.191328+00:00"
-          },
-          "flow": 2,
-          "id": 12,
-          "text": "Age"
-        },
-        {
-          "stats": {
-            "created_on": "2021-07-26T13:57:09.181765+00:00"
-          },
-          "flow": 2,
-          "id": 10,
-          "text": "Extra Comments"
-        }
-      ],
-      "text": "Sample Flow - Satisfaction Survey",
-      "stats": {
-        "created_on": "2021-07-26T13:57:08.792262+00:00",
-        "runs": 0
-      },
-      "id": 2
-    },
-    {
-      "rules": [
-        {
-          "stats": {
-            "created_on": "2021-07-26T13:57:09.344419+00:00"
-          },
-          "flow": 3,
-          "id": 14,
-          "text": "Filter Working"
-        }
-      ],
-      "text": "Sample Flow - Simple Poll",
-      "stats": {
-        "created_on": "2021-07-26T13:57:08.800850+00:00",
-        "runs": 2
-      },
-      "id": 3
-    },
-    {
-      "rules": [
-        {
-          "stats": {
-            "created_on": "2021-07-26T13:57:09.460754+00:00"
-          },
-          "flow": 4,
-          "id": 15,
-          "text": "optIn"
-        }
-      ],
-      "text": "Sample Opt-in Flow",
-      "stats": {
-        "created_on": "2021-07-26T13:57:08.810310+00:00",
-        "runs": 0
-      },
-      "id": 4
-    }
+    flow_1,
+    flow_2,
+    flow_3,
+    flow_4,
+  ],
+  "available_flows": [
+    flow_1,
+    flow_2,
+    flow_3,
+    flow_4,
   ],
   "groups": [
     {
@@ -442,10 +453,11 @@ var test_data = {
     }
   ],
   "endpoints": {
-      "createUpdateReport": "",
-      "deleteReport": "",
-      "loadChartsData": "",
-      "refreshChartsData": "",
+    "configureFlows": "",
+    "createUpdateReport": "",
+    "deleteReport": "",
+    "loadChartsData": "",
+    "refreshChartsData": "",
   },
   "data_status": {
     "lastUpdated": "2010-01-01", "completed": false, "progress": 0.21
