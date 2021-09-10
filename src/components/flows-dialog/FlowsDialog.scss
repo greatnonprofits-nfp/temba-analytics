@@ -1,0 +1,30 @@
+.body {
+  &.p-6 {
+    padding: 1.6rem;
+  }
+
+  .dialog-body {
+    height: fit-content !important;
+  }
+
+  .flows-title {
+    margin-bottom: 5px;
+    margin-left: 4px;
+    display: block;
+    font-weight: 400;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    line-height: normal;
+    color: rgb(119, 119, 119);
+  }
+
+  .flows-help {
+    font-size: 11px;
+    line-height: normal;
+    color: var(--color-text-help);
+    margin-left: var(--help-text-margin-left);
+    margin-top: 6px;
+    transition: opacity 100ms ease-in-out 0s, margin-top 200ms ease-in-out 0s;
+    pointer-events: none;
+  }
+}
