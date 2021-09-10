@@ -1,7 +1,6 @@
 import React from "react";
 import "./App.scss";
 import mutate from "immutability-helper";
-import Button from "./components/button/Button";
 import FieldSelector from "./components/field-selector/FieldSelector";
 import Reports from "./components/reports/Reports";
 import Filters from "./components/filters/Filters";
@@ -27,10 +26,12 @@ import axios from "axios";
 import StatusDialog from "./components/status-dialog/StatusDialog";
 import GearMenu from "./components/gear-menu/GearMenu";
 import GearMenuItem from "./components/gear-menu/GearMenuItem";
+import FlowsDialog from "./components/flows-dialog/FlowsDialog";
 
 interface AnalyticsProps {
   context: {
     flows: Flow[],
+    available_flows: Flow[],
     groups: Group[],
     reports: Report[],
     data_status: DataStatus,
@@ -40,6 +41,7 @@ interface AnalyticsProps {
       deleteReport: string,
       loadChartsData: string,
       refreshChartsData: string,
+      configureFlows: string,
     }
   }
 }
@@ -443,6 +445,20 @@ class Analytics extends React.Component<AnalyticsProps, AnalyticsState> {
   }
 
   render() {
+    if (this.props.context.flows.length === 0) {
+      return <FlowsDialog
+        isVisible={true}
+        allFlows={this.props.context.available_flows}
+        selectedFlows={this.props.context.flows}
+        submitUrl={this.props.context.endpoints.configureFlows}
+        onSuccess={() => {
+          document.location.reload();
+        }}
+        onCancel={() => {
+          window.history.back();
+        }}
+      />
+    }
     if (!this.state.statusDialog.context.lastUpdated) {
       return <div className="analytics">
         <div className="results full-size">
