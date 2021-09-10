@@ -1,21 +1,25 @@
 import React, {createRef} from "react";
 import "./StatusDialog.scss"
 import {getRequestHeaders, renderIf} from "../../utils";
-import {DataStatus} from "../../utils/types";
+import {DataStatus, Flow} from "../../utils/types";
 import moment from "moment";
 import axios from "axios";
+import Select from "react-select";
 
 interface StatusDialogProps {
   refreshUrl: string,
   dataStatus: DataStatus,
   isVisible: boolean,
   onStateChanged: (dataStatus: DataStatus, isVisible: boolean, refreshFields?: boolean) => any,
+  availableFlows: Flow[],
 }
 
 interface StatusDialogState {
   dataStatus: DataStatus,
   isVisible: boolean,
   submitting: boolean,
+  availableFlows: { label: string, value: any }[];
+  selectedFlow: { label: string, value: any };
 }
 
 export default class StatusDialog extends React.Component<StatusDialogProps, StatusDialogState> {
@@ -25,7 +29,14 @@ export default class StatusDialog extends React.Component<StatusDialogProps, Sta
 
   constructor(props: StatusDialogProps) {
     super(props);
-    this.state = {isVisible: props.isVisible, dataStatus: props.dataStatus, submitting: false};
+    let allFlowsItem = {label: "All Flows", value: null};
+    this.state = {
+      isVisible: props.isVisible,
+      dataStatus: props.dataStatus,
+      submitting: false,
+      availableFlows: [allFlowsItem, ...this.props.availableFlows.map(flow => ({label: flow.text, value: flow.id}))],
+      selectedFlow: allFlowsItem,
+    };
     this.modalRef = createRef();
   }
 
@@ -102,7 +113,12 @@ export default class StatusDialog extends React.Component<StatusDialogProps, Sta
 
   private requestStatusRefresh(completely = false) {
     return axios.post(
-      this.props.refreshUrl, {"onlyStatus": !completely}, {headers: getRequestHeaders()}
+      this.props.refreshUrl,
+      {
+        "onlyStatus": !completely,
+        "flow": this.state.selectedFlow.value,
+      },
+      {headers: getRequestHeaders()}
     );
   }
 
@@ -132,6 +148,52 @@ export default class StatusDialog extends React.Component<StatusDialogProps, Sta
         {renderIf(!!this.state.dataStatus.lastUpdated && this.state.dataStatus.completed)(
           <div>Last time when analytics data was prefetched was
             on {StatusDialog.renderDateTime(this.state.dataStatus.lastUpdated)}</div>
+        )}
+        {renderIf(this.state.dataStatus.completed)(
+          <div className={"flow-selector"}>
+            <Select
+              searchable={true}
+              placeholder={"Select the flow"}
+              styles={{
+                control: (provided: any) => ({
+                  ...provided,
+                  "&:focus-within": {
+                    borderColor: "var(--color-focus)",
+                    background: "var(--color-widget-bg-focused)",
+                    boxShadow: "var(--widget-box-shadow-focused)",
+                  }
+                }),
+                menu: (provided: any) => ({
+                  ...provided,
+                  position: "inherit",
+                  padding: "2px",
+                }),
+                menuList: (provided: any) => ({
+                  ...provided,
+                  padding: "2px",
+                }),
+                option: (provided: any) => ({
+                  ...provided,
+                  fontSize: "14px",
+                  padding: "5px 0 5px 10px",
+                  borderRadius: "4px",
+                  marginBottom: "3px",
+                  cursor: "pointer",
+                  color: "var(--color-text-dark)",
+                  background: "var(--color-widget-bg-focused)",
+                  "&:hover": {
+                    background: "var(--color-selection)",
+                  }
+                }),
+              }}
+              options={this.state.availableFlows}
+              value={this.state.selectedFlow}
+              onChange={(selectedFlow: any) => {
+                this.setState({selectedFlow});
+              }}
+            />
+            <div className={"flows-help"}>Select the flows that you want to refresh the data for</div>
+          </div>
         )}
         {renderIf(!!this.state.dataStatus.lastUpdated && !this.state.dataStatus.completed)(
           <>
