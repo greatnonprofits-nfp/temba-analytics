@@ -137,7 +137,15 @@ export default class FieldSelector extends React.Component<FieldSelectorProps, F
         menuList: (provided: any) => ({
           ...provided,
           padding: '4px'
-        })
+        }),
+        control: (provided: any) => ({
+          ...provided,
+          "&:focus-within": {
+            borderColor: "var(--color-focus)",
+            background: "var(--color-widget-bg-focused)",
+            boxShadow: "var(--widget-box-shadow-focused)",
+          }
+        }),
       }}
       options={this.state.allFields}
       filterOption={filterOption(this.state.allFields)}

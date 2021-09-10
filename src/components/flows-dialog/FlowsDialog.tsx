@@ -36,7 +36,7 @@ export default class FlowsDialog extends React.Component<FlowsDialogProps, Flows
   }
 
   componentWillReceiveProps(nextProps: Readonly<FlowsDialogProps>) {
-    this.modalRef.current.open = this.props.isVisible;
+    this.modalRef.current.open = nextProps.isVisible;
   }
 
   componentDidMount() {
@@ -56,7 +56,9 @@ export default class FlowsDialog extends React.Component<FlowsDialogProps, Flows
               if (!!this.props.onSuccess) this.props.onSuccess();
             }).catch(() => {
               this.setState({errorAlert: "Something went wrong. Please try again later."});
-              setTimeout(() => {if (!!this.props.onCancel) this.props.onCancel()}, 3000);
+              setTimeout(() => {
+                if (!!this.props.onCancel) this.props.onCancel()
+              }, 3000);
             });
           } else {
             this.setState({errorAlert: "Please select at least one flow to proceed"});
@@ -121,6 +123,14 @@ export default class FlowsDialog extends React.Component<FlowsDialogProps, Flows
             menu: (provided: any) => ({
               ...provided,
               position: "inherit",
+            }),
+            control: (provided: any) => ({
+              ...provided,
+              "&:focus-within": {
+                borderColor: "var(--color-focus)",
+                background: "var(--color-widget-bg-focused)",
+                boxShadow: "var(--widget-box-shadow-focused)",
+              }
             }),
           }}
           options={this.state.availableFlows}
